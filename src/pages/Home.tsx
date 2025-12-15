@@ -45,7 +45,7 @@ const Home = () => {
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
-      title: "22,000+ Installations",
+      title: "23,000+ Installations",
       desc: "Proven track record across India",
     },
   ];
