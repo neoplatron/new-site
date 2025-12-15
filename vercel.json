@@ -9,11 +9,6 @@
       "source": "/webmail",
       "destination": "https://webmail.neoplatron.com",
       "permanent": false
-    },
-    {
-      "source": "/admin",
-      "destination": "https://cpanel.neoplatron.com",
-      "permanent": false
     }
   ],
   "rewrites": [
