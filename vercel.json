@@ -7,7 +7,7 @@
     },
     {
       "source": "/webmail",
-      "destination": "https://webmail.neoplatron.com",
+      "destination": "https://45.113.122.70:2096",
       "permanent": false
     }
   ],
