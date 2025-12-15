@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/cpanel",
-      "destination": "https://cpanel.neoplatron.com",
+      "destination": "https://45.113.122.70:2083/",
       "permanent": false
     },
     {
