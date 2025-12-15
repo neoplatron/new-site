@@ -811,12 +811,12 @@
 //                 The Team
 //               </h3>
 //               <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-//                 {/* Mr. V. Adhitya Kishor Kumar */}
+//                 {/* Mr. V. Aditya Kishor Kumar */}
 //                 <div className="bg-bg dark:bg-d-bg p-6 rounded-2xl border border-border dark:border-d-border shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
 //                   <div className="w-20 h-20 rounded-full bg-linear-to-br from-primary/20 to-primary/10 mb-5 flex items-center justify-center text-2xl font-bold text-primary">
 //                     A
 //                   </div>
-//                   <h4 className="text-xl font-bold text-text dark:text-d-text mb-2">Mr. V. Adhitya Kishor Kumar</h4>
+//                   <h4 className="text-xl font-bold text-text dark:text-d-text mb-2">Mr. V. Aditya Kishor Kumar</h4>
 //                   <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
 //                     Founder, CMD, MD, CEO & CTO
 //                   </div>
@@ -1834,12 +1834,12 @@ const AboutUs = () => {
                 The Team
               </h3>
               <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                {/* Mr. V. Adhitya Kishor Kumar */}
+                {/* Mr. V. Aditya Kishor Kumar */}
                 <div className="bg-bg dark:bg-d-bg p-6 rounded-2xl border border-border dark:border-d-border shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
                   <div className="w-20 h-20 rounded-full bg-linear-to-br from-primary/20 to-primary/10 mb-5 flex items-center justify-center text-2xl font-bold text-primary">
                     A
                   </div>
-                  <h4 className="text-xl font-bold text-text dark:text-d-text mb-2">Mr. V. Adhitya Kishor Kumar</h4>
+                  <h4 className="text-xl font-bold text-text dark:text-d-text mb-2">Mr. V. Aditya Kishor Kumar</h4>
                   <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
                     Founder, CMD, MD, CEO & CTO
                   </div>
