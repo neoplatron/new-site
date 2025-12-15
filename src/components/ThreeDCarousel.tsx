@@ -87,7 +87,7 @@ const ThreeDCarousel: React.FC<ThreeDCarouselProps> = ({ items }) => {
     const itemCount = items.length;
     const theta = 360 / itemCount;
     const cardWidth = 220; // Reduced from 280
-    const cardHeight = 260; // Reduced from 320
+    // const cardHeight = 260; // Reduced from 320
     const radius = Math.round((cardWidth / 2) / Math.tan(Math.PI / itemCount));
 
     return (
