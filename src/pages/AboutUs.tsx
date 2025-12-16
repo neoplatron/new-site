@@ -144,7 +144,7 @@ const AboutUs = () => {
                     <p className="text-sm sm:text-base leading-relaxed text-text-para dark:text-d-text-para">
                       NEOPLATRON India Private Limited is at the forefront of
                       revolutionizing green mobility through cutting-edge
-                      hydrogen technology. Founded on 16 years of dedicated
+                      hydrogen technology. Founded on 19+ years of dedicated
                       research and innovation, we manufacture the Advanced
                       Digital Plasma Technology (ADPT) device a breakthrough
                       solution that transforms vehicle efficiency and
