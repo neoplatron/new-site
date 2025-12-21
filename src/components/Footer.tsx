@@ -31,8 +31,8 @@ const Footer = () => {
     {
       icon: Phone,
       label: "Phone",
-      value: "+91 8096088886",
-      href: "tel:+918096088886",
+      value: "+91 74164 93939",
+      href: "tel:+917416493939",
     },
     {
       icon: Mail,
@@ -43,7 +43,7 @@ const Footer = () => {
     {
       icon: MapPin,
       label: "Address",
-      value: "ECIL, Hyderabad-51, Telangana",
+      value: "Cherlapalli Phase-3, Hyderabad-51, Telangana",
       href: "https://maps.google.com/?q=ECIL,Hyderabad",
     },
   ];
