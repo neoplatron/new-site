@@ -58,9 +58,9 @@ const ContactUs = () => {
     {
       icon: Phone,
       label: "Phone",
-      value: "+91 8096088886",
+      value: "+91 7416493939",
       subtext: "Mon-Sat, 9AM-6PM",
-      href: "tel:+918096088886",
+      href: "tel:+917416493939",
       color: "primary",
     },
     {
