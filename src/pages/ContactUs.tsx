@@ -76,7 +76,7 @@ const ContactUs = () => {
       label: "Office",
       value: "Cherlapalli Phase-3, Hyderabad-51",
       subtext: "Telangana, India",
-      href: "https://maps.google.com/?q=ECIL,Hyderabad",
+      href: "https://maps.app.goo.gl/2hEuUsaM4jhPsH1i8",
       color: "tertiary",
     },
   ];
