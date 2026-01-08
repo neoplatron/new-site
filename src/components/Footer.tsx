@@ -51,19 +51,19 @@ const Footer = () => {
   const socialLinks = [
     {
       icon: Facebook,
-      href: "https://facebook.com/PLACEHOLDER", // Replace with actual link
+      href: "", // Replace with actual link
       label: "Facebook",
       color: "hover:bg-[#1877F2] hover:text-white",
     },
     {
       icon: Twitter,
-      href: "https://twitter.com/PLACEHOLDER", // Replace with actual link
+      href: "", // Replace with actual link
       label: "Twitter",
       color: "hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black",
     },
     {
       icon: Instagram,
-      href: "https://instagram.com/PLACEHOLDER", // Replace with actual link
+      href: "https://www.instagram.com/neoplatron/", // Replace with actual link
       label: "Instagram",
       color: "hover:bg-linear-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:text-white",
     },
@@ -75,7 +75,7 @@ const Footer = () => {
     },
     {
       icon: Youtube,
-      href: "https://youtube.com/@PLACEHOLDER", // Replace with actual link
+      href: "https://www.youtube.com/@neoplatronhydrogen", // Replace with actual link
       label: "YouTube",
       color: "hover:bg-[#FF0000] hover:text-white",
     },
