@@ -51,7 +51,7 @@ const Footer = () => {
   const socialLinks = [
     {
       icon: Facebook,
-      href: "", // Replace with actual link
+      href: "https://www.facebook.com/Neoplatron", // Replace with actual link
       label: "Facebook",
       color: "hover:bg-[#1877F2] hover:text-white",
     },
