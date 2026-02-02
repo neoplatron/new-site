@@ -156,7 +156,7 @@ const AboutUs = () => {
                     <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
                       <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-secondary mt-1.5 sm:mt-2 group-hover:scale-150 transition-transform"></div>
                       <h3 className="font-title text-lg sm:text-xl font-semibold text-text dark:text-d-text">
-                        Combating Climate Crisis
+                        Combating Global Warming
                       </h3>
                     </div>
                     <p className="text-sm sm:text-base leading-relaxed text-text-para dark:text-d-text-para">
