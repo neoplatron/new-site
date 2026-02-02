@@ -835,7 +835,7 @@ const AboutUs = () => {
                   </div>
                   <h4 className="text-xl font-bold text-text dark:text-d-text mb-2">Ms. V. Kiran Kumari</h4>
                   <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-                    Director, CFO
+                    Director, MD
                   </div>
                   <div className="text-text-para dark:text-d-text-para text-sm space-y-3">
                     <p><strong>Experience:</strong> Expertise in management roles such as purchase, stores, and production.</p>
