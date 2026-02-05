@@ -181,8 +181,8 @@ const AboutUs = () => {
                       Managing Director with 30+ years of automotive and
                       alternative fuels experience, we've developed a unique
                       product using plasma technology that improves mileage for
-                      diesel and petrol vehicles from 2-wheelers to trucks,
-                      covering engine capacities from 100cc to 6000cc.
+                      petrol,diesel,LPG and CNG vehicles from 2-wheelers to trucks,
+                      covering engine capacities from 100cc to 12000cc,earth movers,DG sets and marine engines
                     </p>
                   </div>
                 </div>
@@ -415,7 +415,7 @@ const AboutUs = () => {
 
                   <div className="space-y-3 sm:space-y-4">
                     <p className="text-sm sm:text-base text-text-para dark:text-d-text-para leading-relaxed">
-                      In India, over 32 crore vehicles are currently on the
+                      In India, over 32 crore+ vehicles are currently on the
                       road, contributing massively to air pollution. At
                       NEOPLATRON, we aim to solve this challenge through an
                       affordable and portable retrofitting solution that can be
