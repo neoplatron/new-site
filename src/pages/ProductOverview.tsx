@@ -305,7 +305,7 @@ const ProductOverview: React.FC = () => {
               </h3>
               <p className="text-text-para dark:text-d-text-para mb-4">
                 The device separates water into hydrogen and oxygen on-demand. This hydrogen gas acts as a catalyst,
-                helping the primary fuel (petrol/diesel) burn more completely and quickly inside the engine cylinder.
+                helping the primary fuel (petrol/diesel/LPG/CNG) burn more completely and quickly inside the engine cylinder.
               </p>
             </div>
             <div className="bg-bg-light dark:bg-d-bg-light p-8 rounded-2xl border border-border dark:border-d-border">
