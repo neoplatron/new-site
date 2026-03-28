@@ -5,7 +5,7 @@ interface SEOProps {
   description?: string;
   canonical?: string;
   keywords?: string;
-  // Fallbacks if not provided
+  noindex?: boolean;
 }
 
 export default function SEO({
@@ -13,6 +13,7 @@ export default function SEO({
   description = "Neoplatron offers revolutionary ADPT technology to increase vehicle mileage, reduce emissions, and optimize fuel efficiency for bikes, cars, trucks, and heavy machinery.",
   canonical,
   keywords = "fuel efficiency, increase mileage, Neoplatron, hydrogen fuel kit India, ADPT technology, reduce vehicle emissions, better fuel economy, mileage enhancer, green mobility",
+  noindex = false,
 }: SEOProps) {
   const currentUrl = canonical ? canonical : window.location.href;
   const canonicalUrl = currentUrl.startsWith('http') ? currentUrl : `https://neoplatron.com${currentUrl}`;
@@ -37,6 +38,7 @@ export default function SEO({
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       
       {/* Canonical Link */}
       <link rel="canonical" href={canonicalUrl} />

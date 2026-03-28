@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "../integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Shield, Lock, ArrowRight, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function AdminLogin() {
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
@@ -111,6 +112,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-bg dark:bg-d-bg flex items-center justify-center p-4">
+      <SEO title="Admin Login - Neoplatron" noindex />
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">

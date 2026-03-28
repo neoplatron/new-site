@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Home, ArrowLeft } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function NotFound() {
     return (
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-4 text-center">
+            <SEO title="Page Not Found - Neoplatron" description="The page you are looking for does not exist." noindex />
             <div className="bg-primary/5 p-6 rounded-full mb-6 animate-fade-up">
                 <Home className="w-16 h-16 text-primary" />
             </div>

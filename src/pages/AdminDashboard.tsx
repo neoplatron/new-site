@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Database } from "../integrations/supabase/types";
+import SEO from "../components/SEO";
 
 import { isWarrantyValid } from "../utils/warrantyUtils";
 
@@ -294,6 +295,7 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-bg dark:bg-d-bg font-body transition-colors duration-300">
+            <SEO title="Admin Dashboard - Neoplatron" noindex />
             {/* Navigation */}
             <nav className="border-b border-border dark:border-d-border bg-white dark:bg-d-bg-light sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
