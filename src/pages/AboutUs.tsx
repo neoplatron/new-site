@@ -15,6 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { our_mission, our_vision } from "../constants/images";
 import FloatingParticles from "../components/FloatingParticles";
+import VideoReviews from "../components/VideoReviews";
 
 const AboutUs = () => {
   const milestones = [
@@ -778,6 +779,9 @@ const AboutUs = () => {
           </div>
         </div>
       </section>
+
+      <VideoReviews />
+
       {/* Founders & Investors Section */}
       <section className="py-12 sm:py-24 px-4 sm:px-6 lg:px-8 bg-bg-light dark:bg-d-bg-light relative overflow-hidden">
         {/* Background decorative elements */}
