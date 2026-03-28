@@ -5,7 +5,7 @@
     "children": [
       {
         "name": "ACCESS",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/ACCESS/IMG_20201219_164118724.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -17,7 +17,7 @@
       },
       {
         "name": "ACTIVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/ACTIVA/IMG_20220919_133340.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -33,7 +33,7 @@
       },
       {
         "name": "HERO SPLENDER",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/HERO SPLENDER/2.JPG",
         "children": {
           "type": "model_content",
           "images": [
@@ -45,7 +45,7 @@
       },
       {
         "name": "honda activa",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/honda activa/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -56,7 +56,7 @@
       },
       {
         "name": "HONDA SHINE",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/HONDA SHINE/1.JPG",
         "children": {
           "type": "model_content",
           "images": [
@@ -70,7 +70,7 @@
       },
       {
         "name": "RE",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/RE/a1.JPG",
         "children": {
           "type": "model_content",
           "images": [
@@ -99,7 +99,7 @@
       },
       {
         "name": "ROYAL ENFIELD SILVER",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/2 WHEELERS/ROYAL ENFIELD SILVER/IMG_20200823_165910268_HDR.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -688,7 +688,7 @@
       },
       {
         "name": "JEEP",
-        "thumbnail": null,
+        "thumbnail": "",
         "children": [
           {
             "name": "JEEP COMPASS AT",
@@ -711,7 +711,7 @@
       },
       {
         "name": "KIA",
-        "thumbnail": null,
+        "thumbnail": "",
         "children": [
           {
             "name": "KIA CARENS PET AT",
@@ -1502,7 +1502,7 @@
       },
       {
         "name": "MG",
-        "thumbnail": null,
+        "thumbnail": "",
         "children": [
           {
             "name": "MG HECTOR",
@@ -1833,7 +1833,7 @@
       },
       {
         "name": "TATA",
-        "thumbnail": null,
+        "thumbnail": "",
         "children": [
           {
             "name": "HARRIER D AT",
@@ -2106,7 +2106,7 @@
       },
       {
         "name": "VW",
-        "thumbnail": null,
+        "thumbnail": "",
         "children": [
           {
             "name": "VENTO",
@@ -2148,7 +2148,7 @@
     "children": [
       {
         "name": "CNG BUS",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/6 WHEELERS/CNG BUS/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2165,7 +2165,7 @@
       },
       {
         "name": "FORCE CNG",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/6 WHEELERS/FORCE CNG/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2181,7 +2181,7 @@
       },
       {
         "name": "SCHOOL BUS",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/6 WHEELERS/SCHOOL BUS/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2208,7 +2208,7 @@
     "children": [
       {
         "name": "DG 125 KVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 125 KVA/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2221,7 +2221,7 @@
       },
       {
         "name": "DG 250 KVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 250 KVA/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2232,7 +2232,7 @@
       },
       {
         "name": "DG 500KVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 500KVA/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2251,7 +2251,7 @@
     "children": [
       {
         "name": "Earth Movers CAT JCB",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2273,7 +2273,7 @@
     "children": [
       {
         "name": "TATA 393",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/TRUCKS/TATA 393/A.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2289,7 +2289,7 @@
       },
       {
         "name": "TATA 977",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/TRUCKS/TATA 977/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
