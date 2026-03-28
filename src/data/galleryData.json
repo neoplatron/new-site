@@ -127,6 +127,24 @@
                 "/vehicles/4 WHEELERS/BMW/BMW 523i/BMW 523i1528654501.jpg"
               ]
             }
+          },
+          {
+            "name": "BMW X5 PET",
+            "thumbnail": "/vehicles/4 WHEELERS/BMW/BMW X5 PET/A.jpg",
+            "children": {
+              "type": "model_content",
+              "images": [
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/A.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/B.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/C.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/D.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/E.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/F.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/G.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/H.jpg",
+                "/vehicles/4 WHEELERS/BMW/BMW X5 PET/I.jpg"
+              ]
+            }
           }
         ]
       },
@@ -1238,11 +1256,49 @@
     "thumbnail": "/vehicles/6 WHEELERS/thumbnail.png",
     "children": [
       {
-        "name": "SCHOOL BUS",
-        "thumbnail": null,
+        "name": "CNG BUS",
+        "thumbnail": "/vehicles/6 WHEELERS/CNG BUS/1.jpg",
         "children": {
           "type": "model_content",
           "images": [
+            "/vehicles/6 WHEELERS/CNG BUS/1.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/2.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/3.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/4.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/5.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/6.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/7.jpg",
+            "/vehicles/6 WHEELERS/CNG BUS/8.jpg"
+          ]
+        }
+      },
+      {
+        "name": "FORCE CNG",
+        "thumbnail": "/vehicles/6 WHEELERS/FORCE CNG/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/6 WHEELERS/FORCE CNG/1.jpg",
+            "/vehicles/6 WHEELERS/FORCE CNG/2.jpg",
+            "/vehicles/6 WHEELERS/FORCE CNG/3.jpg",
+            "/vehicles/6 WHEELERS/FORCE CNG/4.jpg",
+            "/vehicles/6 WHEELERS/FORCE CNG/5.jpg",
+            "/vehicles/6 WHEELERS/FORCE CNG/6.jpg",
+            "/vehicles/6 WHEELERS/FORCE CNG/7.jpg"
+          ]
+        }
+      },
+      {
+        "name": "SCHOOL BUS",
+        "thumbnail": "/vehicles/6 WHEELERS/SCHOOL BUS/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/6 WHEELERS/SCHOOL BUS/1.jpg",
+            "/vehicles/6 WHEELERS/SCHOOL BUS/2.jpg",
+            "/vehicles/6 WHEELERS/SCHOOL BUS/3.jpg",
+            "/vehicles/6 WHEELERS/SCHOOL BUS/4.jpg",
+            "/vehicles/6 WHEELERS/SCHOOL BUS/5.jpg",
             "/vehicles/6 WHEELERS/SCHOOL BUS/SCHOOL BUS1528530980.jpg",
             "/vehicles/6 WHEELERS/SCHOOL BUS/SCHOOL BUS1528531018.jpg",
             "/vehicles/6 WHEELERS/SCHOOL BUS/SCHOOL BUS1528531057.jpg",
@@ -1250,6 +1306,110 @@
             "/vehicles/6 WHEELERS/SCHOOL BUS/SCHOOL BUS1528531849.jpg",
             "/vehicles/6 WHEELERS/SCHOOL BUS/SCHOOL BUS1528531886.jpg",
             "/vehicles/6 WHEELERS/SCHOOL BUS/SCHOOL BUS1528531932.jpg"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "DIESEL GENERATORS",
+    "thumbnail": "",
+    "children": [
+      {
+        "name": "DG 125 KVA",
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 125 KVA/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/DIESEL GENERATORS/DG 125 KVA/1.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 125 KVA/2.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 125 KVA/3.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 125 KVA/4.jpg"
+          ]
+        }
+      },
+      {
+        "name": "DG 250 KVA",
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 250 KVA/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/DIESEL GENERATORS/DG 250 KVA/1.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 250 KVA/2.jpg"
+          ]
+        }
+      },
+      {
+        "name": "DG 500KVA",
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 500KVA/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/1.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/2.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/3.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/4.jpg"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "EARTH MOVERS",
+    "thumbnail": "",
+    "children": [
+      {
+        "name": "Earth Movers CAT JCB",
+        "thumbnail": "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/1.jpg",
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/2.jpg",
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/4.jpg",
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/5.jpg",
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/6.jpg",
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/7.jpg",
+            "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/IMG_20230617_151505.jpg"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "TRUCKS",
+    "thumbnail": "",
+    "children": [
+      {
+        "name": "TATA 393",
+        "thumbnail": "/vehicles/TRUCKS/TATA 393/A.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/TRUCKS/TATA 393/A.jpg",
+            "/vehicles/TRUCKS/TATA 393/B.jpg",
+            "/vehicles/TRUCKS/TATA 393/C.jpg",
+            "/vehicles/TRUCKS/TATA 393/D.jpg",
+            "/vehicles/TRUCKS/TATA 393/E.jpg",
+            "/vehicles/TRUCKS/TATA 393/F.jpg",
+            "/vehicles/TRUCKS/TATA 393/G.jpg"
+          ]
+        }
+      },
+      {
+        "name": "TATA 977",
+        "thumbnail": "/vehicles/TRUCKS/TATA 977/1.jpg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/TRUCKS/TATA 977/1.jpg",
+            "/vehicles/TRUCKS/TATA 977/2.jpg",
+            "/vehicles/TRUCKS/TATA 977/3.jpg",
+            "/vehicles/TRUCKS/TATA 977/4.jpg",
+            "/vehicles/TRUCKS/TATA 977/5.jpg",
+            "/vehicles/TRUCKS/TATA 977/6.jpg",
+            "/vehicles/TRUCKS/TATA 977/7.jpg",
+            "/vehicles/TRUCKS/TATA 977/8.jpg"
           ]
         }
       }
