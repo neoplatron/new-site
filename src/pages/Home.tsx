@@ -27,6 +27,7 @@ import {
 } from "../constants/icons";
 import ThreeDCarousel from "../components/ThreeDCarousel";
 import SavingsCalculator from "../components/SavingsCalculator";
+import SEO from "../components/SEO";
 import "./Home.css";
 
 const Home = () => {
@@ -83,6 +84,13 @@ const Home = () => {
 
   return (
     <>
+      <SEO 
+        title="Neoplatron - Advanced Fuel Efficiency Solutions & Mileage Kits"
+        description="Increase vehicle mileage by 70-100% and reduce emissions by 80-90% with Neoplatron's patented ADPT technology. Ideal for bikes, cars, and heavy machinery."
+        canonical="/"
+        keywords="fuel efficiency solutions, increase mileage, Neoplatron India, hydrogen fuel kit, reduce vehicle pollution, ADPT technology, green mobility"
+      />
+      
       <section className="relative flex items-center justify-center overflow-hidden bg-bg dark:bg-d-bg">
         <div className="absolute inset-0">
           {/* Base gradient */}

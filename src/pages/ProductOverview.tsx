@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 import FloatingParticles from "../components/FloatingParticles";
 import {
   CheckCircle,
@@ -179,7 +180,14 @@ const ProductOverview: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-d-bg">
+    <div className="min-h-screen bg-bg dark:bg-d-bg relative overflow-hidden">
+      <SEO 
+        title="Products Overview - Neoplatron | Optimize Any Engine Type"
+        description="Explore Neoplatron's range of fuel optimization solutions for 2-wheelers, 3-wheelers, 4-wheelers, commercial vehicles, and heavy machinery. Compatible with Petrol, Diesel, CNG, LPG."
+        canonical="/products/overview"
+        keywords="Neoplatron products, fuel optimization solutions, engine compatibility, bike mileage enhancer, car mileage kit, diesel engine optimizer"
+      />
+
       {/* Hero Section */}
       <section className="relative bg-linear-to-br from-primary via-secondary to-primary text-white py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

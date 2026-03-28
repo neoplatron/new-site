@@ -12,6 +12,7 @@ import {
   MessageCircle,
   ArrowRight,
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 // Mock FAQ data matching your structure
 const faqData = [
@@ -172,7 +173,14 @@ const FAQs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-d-bg">
+    <div className="min-h-screen bg-bg dark:bg-d-bg flex flex-col relative overflow-hidden">
+      <SEO 
+        title="Frequently Asked Questions (FAQs) - Neoplatron"
+        description="Have questions about Neoplatron's ADPT technology or installation? Read our FAQs on safety, compatibility, maintenance, and expected savings."
+        canonical="/faqs"
+        keywords="Neoplatron FAQs, ADPT technology questions, is Neoplatron safe, hydrogen fuel kit FAQs, mileage kit warranty, vehicle compatibility"
+      />
+
       {/* Hero Section */}
       <section className="relative bg-linear-to-br from-primary via-secondary to-primary text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background pattern */}

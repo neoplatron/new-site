@@ -7,6 +7,9 @@ import {
   // CheckCircle,
   ArrowRight,
 } from "lucide-react";
+// import { Mail, MapPin, Phone, Send, ArrowRight } from "lucide-react";
+// import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 // import { contactUs } from "../constants/illustrations";
 // import Lottie from "lottie-react";
 
@@ -91,8 +94,15 @@ const ContactUs = () => {
   // ];
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-d-bg">
-      {/* Hero Section - Compact */}
+    <div className="min-h-[calc(100vh-80px)] bg-bg dark:bg-d-bg flex flex-col relative overflow-hidden">
+      <SEO 
+        title="Contact Us - Neoplatron Customer Support & Dealership"
+        description="Get in touch with Neoplatron's support team for product inquiries, dealership opportunities, or installation assistance in Hyderabad and across India."
+        canonical="/contact"
+        keywords="contact Neoplatron, Neoplatron customer care, dealership inquiry, Neoplatron Hyderabad, buy fuel efficiency kit"
+      />
+
+      {/* Decorative background elements */}
       <section className="relative bg-linear-to-br from-primary via-secondary to-primary text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10">

@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { our_mission, our_vision } from "../constants/images";
 import FloatingParticles from "../components/FloatingParticles";
 import VideoReviews from "../components/VideoReviews";
+import SEO from "../components/SEO";
 
 const AboutUs = () => {
   const milestones = [
@@ -50,6 +51,13 @@ const AboutUs = () => {
 
   return (
     <div className="min-h-screen bg-bg dark:bg-d-bg">
+      <SEO 
+        title="About Us - Neoplatron | 19+ Years of Green Innovation"
+        description="Learn about Neoplatron's mission to create a net zero-emission future. Discover our journey, our founders, and the patented Advanced Digital Plasma Technology."
+        canonical="/about"
+        keywords="about Neoplatron, Neoplatron founders, V.Aditya Kishore Kumar, ADPT technology history, zero emission future, green innovation company India"
+      />
+
       {/* Hero Section */}
       <section className="relative bg-linear-to-br from-primary via-secondary to-primary text-white py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Subtle background pattern */}

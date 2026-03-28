@@ -20,6 +20,7 @@ import {
 import { supabase } from "../integrations/supabase/client";
 import { validateSellerCode, searchWarranty } from "../api/warrantyAPI";
 import SimpleCaptcha from "../components/SimpleCaptcha";
+import SEO from "../components/SEO";
 
 // ==================== TYPES ====================
 type WarrantyMode = "vehicle" | "generator";
@@ -89,6 +90,12 @@ const WarrantyPage = () => {
 
   return (
     <div className="min-h-screen bg-bg dark:bg-d-bg">
+      <SEO 
+        title="Warranty & Policies - Neoplatron"
+        description="Read Neoplatron's Warranty, Terms & Conditions, Privacy Policy, and Refund Policy. We stand by our ADPT engine optimization products."
+        canonical="/warranty"
+        keywords="Neoplatron warranty, refund policy, terms and conditions, ADPT warranty, customer policies"
+      />
       {/* Hero Section */}
       <section className="relative bg-linear-to-br from-primary via-secondary to-primary text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

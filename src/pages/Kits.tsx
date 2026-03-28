@@ -9,6 +9,7 @@ import {
 
 import { platron1, platron2, platron3 } from "../constants/images";
 import FloatingParticles from "../components/FloatingParticles";
+import SEO from "../components/SEO";
 
 const Kits = () => {
 
@@ -72,6 +73,12 @@ const Kits = () => {
 
   return (
     <div className="min-h-screen bg-bg dark:bg-d-bg">
+      <SEO 
+        title="Advanced Mileage Enhancement Kits - Neoplatron"
+        description="Discover Neoplatron's range of ADPT fuel saver kits designed for different vehicle segments. Improve mileage, extend engine life, and reduce emissions."
+        canonical="/products/kits"
+        keywords="mileage enhancement kits, fuel saver kits, Neoplatron ADPT kits, two wheeler fuel kit, truck mileage improver, hydrogen kit for cars"
+      />
 
       {/* HERO */}
       <section className="relative bg-gradient-to-br from-primary via-secondary to-primary text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Folder, ArrowLeft, Image as ImageIcon, ZoomIn, X, ChevronLeft, ChevronRight, Home, Car } from "lucide-react";
 import galleryDataRaw from "../data/galleryData.json";
+import SEO from "../components/SEO";
 
 // Types based on the generated JSON
 type GalleryNode = {
@@ -117,6 +118,12 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen bg-bg dark:bg-d-bg pt-20 pb-12 font-body transition-colors duration-300">
+      <SEO 
+        title="Installations Gallery - Neoplatron Solutions Before & After"
+        description="View gallery of Neoplatron installations across thousands of vehicles in India. Proof of our technology working on bikes, cars, buses, and heavy commercial vehicles."
+        canonical="/gallery"
+        keywords="Neoplatron gallery, vehicle installations, ADPT installation photos, hydrogen kit setup, before after fuel savings"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header Section */}
