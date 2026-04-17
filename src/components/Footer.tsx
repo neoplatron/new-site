@@ -19,6 +19,7 @@ const Footer = () => {
     { name: "About Us", path: "/about" },
     { name: "Products", path: "/products/overview" },
     { name: "Gallery", path: "/gallery" },
+    { name: "Partners", path: "/partners" },
   ];
 
   const supportLinks = [

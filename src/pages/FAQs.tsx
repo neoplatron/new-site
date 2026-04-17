@@ -98,12 +98,6 @@ const faqData = [
   },
 ];
 
-interface FAQItem {
-  category: string;
-  question: string;
-  answer: string[];
-}
-
 const FAQs = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -142,7 +136,19 @@ const FAQs = () => {
     },
   ];
 
-  const faqs = (faqData as FAQItem[]).map((faq) => ({
+  const filteredFaqsData = faqData.filter((faq) => {
+    const matchesCategory =
+      activeCategory === "all" || faq.category === activeCategory;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      faq.question.toLowerCase().includes(searchLower) ||
+      faq.answer.some((line) => line.toLowerCase().includes(searchLower));
+
+    return matchesCategory && matchesSearch;
+  });
+
+  const filteredFaqs = filteredFaqsData.map((faq) => ({
     ...faq,
     answer: (
       <ul className="space-y-2.5">
@@ -158,15 +164,6 @@ const FAQs = () => {
       </ul>
     ),
   }));
-
-  const filteredFaqs = faqs.filter((faq) => {
-    const matchesCategory =
-      activeCategory === "all" || faq.category === activeCategory;
-    const matchesSearch = faq.question
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
