@@ -44,8 +44,8 @@ const Footer = () => {
     {
       icon: MapPin,
       label: "Address",
-      value: "Cherlapalli Phase-3, Hyderabad-51, Telangana India",
-      href: "https://maps.app.goo.gl/2hEuUsaM4jhPsH1i8",
+      value: "Hyderabad-51, Telangana India",
+      href: "https://maps.app.goo.gl/tdZ5UoTPnhBUGhXs5",
     },
   ];
 
