@@ -4,7 +4,9 @@ function AppContent() {
   const location = useLocation();
   const isAdminRequest = location.pathname.startsWith("/admin");
 
-  ...
+  return (
+    ...
+  );
 }
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
