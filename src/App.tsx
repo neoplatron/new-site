@@ -54,6 +54,8 @@ function AppContent() {
 }
 
 function App() {
+  throw new Error("Application crashed");
+
   return (
     <Router>
       <AppContent />
