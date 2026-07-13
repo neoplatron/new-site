@@ -1,3 +1,11 @@
+function AppContent() {
+  throw new Error("Application crashed");
+
+  const location = useLocation();
+  const isAdminRequest = location.pathname.startsWith("/admin");
+
+  ...
+}
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
