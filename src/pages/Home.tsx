@@ -201,10 +201,17 @@ const Home = () => {
 
               {/* CTA Button */}
               <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-6 md:gap-8 pt-4">
-                <Link to="/products/overview" className="group relative inline-flex items-center gap-3 bg-linear-to-r from-primary to-secondary hover:from-secondary hover:to-tertiary text-white font-button font-semibold px-6 py-3 md:px-8 md:py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105">
-                  <span>View Products</span>
-                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <Link to="/products/overview" className="group relative inline-flex items-center gap-3 bg-linear-to-r from-primary to-secondary hover:from-secondary hover:to-tertiary text-white font-button font-semibold px-6 py-3 md:px-8 md:py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105">
+                    <span>View Products</span>
+                    <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link to="/get-started" className="group relative inline-flex items-center gap-3 bg-bg dark:bg-d-bg text-text dark:text-d-text font-button font-semibold px-6 py-3 md:px-8 md:py-4 rounded-xl border-2 border-tertiary dark:border-d-tertiary transition-all duration-300 shadow-lg shadow-tertiary/20 hover:shadow-2xl hover:shadow-tertiary/40 hover:scale-105 hover:bg-tertiary/10 dark:hover:bg-d-tertiary/10">
+                    <span>Get Started</span>
+                    <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-tertiary dark:text-d-tertiary group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
 
                 {/* Secondary stats */}
                 <div className="flex items-center gap-4 md:gap-6">

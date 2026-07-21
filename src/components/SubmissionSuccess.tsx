@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { CheckCircle2, MessageCircle, Phone, ArrowRight } from "lucide-react";
 
-const PHONE_NUMBER = "9666636525";
+const PHONE_NUMBER = "9666636524";
 const WHATSAPP_URL =
   "https://wa.me/919666636524?text=Hi%20Neoplatron!%20I%27m%20interested%20in%20the%20Neoplatron%20Green%20Hydrogen%20Kit.%20I%20would%20like%20to%20know%20more%20about%20the%20product";
 

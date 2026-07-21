@@ -55,7 +55,7 @@ const GetStarted = () => {
           <div className="flex items-center justify-center mb-3 sm:mb-4">
             <div className="h-px w-8 sm:w-12 bg-tertiary"></div>
             <span className="px-3 sm:px-4 text-xs sm:text-sm font-medium tracking-widest uppercase text-bg-light">
-              Get Started
+              Get in Touch
             </span>
             <div className="h-px w-8 sm:w-12 bg-tertiary"></div>
           </div>
