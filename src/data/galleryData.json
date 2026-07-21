@@ -92,8 +92,7 @@
             "/vehicles/2 WHEELERS/ROYAL ENFIELD/b.JPG",
             "/vehicles/2 WHEELERS/ROYAL ENFIELD/c.JPG",
             "/vehicles/2 WHEELERS/ROYAL ENFIELD/d.JPG",
-            "/vehicles/2 WHEELERS/ROYAL ENFIELD/e.JPG",
-            "/vehicles/2 WHEELERS/ROYAL ENFIELD/IMG_20200823_165934135_HDR.jpg"
+            "/vehicles/2 WHEELERS/ROYAL ENFIELD/e.JPG"
           ]
         }
       },
@@ -131,8 +130,7 @@
                 "/vehicles/3 WHEELERS/BAJAJ AUTO/CNG AUTO/3.jpg",
                 "/vehicles/3 WHEELERS/BAJAJ AUTO/CNG AUTO/4.jpg",
                 "/vehicles/3 WHEELERS/BAJAJ AUTO/CNG AUTO/5.jpg",
-                "/vehicles/3 WHEELERS/BAJAJ AUTO/CNG AUTO/6.jpg",
-                "/vehicles/3 WHEELERS/BAJAJ AUTO/CNG AUTO/7.jpg"
+                "/vehicles/3 WHEELERS/BAJAJ AUTO/CNG AUTO/6.jpg"
               ]
             }
           }
@@ -142,25 +140,6 @@
         "name": "PIAGGIO AUTO",
         "thumbnail": "/vehicles/3 WHEELERS/PIAGGIO AUTO/thumbnail.png",
         "children": [
-          {
-            "name": "PETROL + LPG",
-            "thumbnail": "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528628771.jpg",
-            "children": {
-              "type": "model_content",
-              "images": [
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528628771.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528628808.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528628836.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528628864.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528628958.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528629050.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528629097.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528629146.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528629291.jpg",
-                "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL + LPG/PETROL + LPG WITH KIT1528629335.jpg"
-              ]
-            }
-          },
           {
             "name": "PETROL AUTO",
             "thumbnail": "/vehicles/3 WHEELERS/PIAGGIO AUTO/PETROL AUTO/PETROL AUTO1528630034.jpg",
@@ -474,22 +453,6 @@
             }
           },
           {
-            "name": "HYUNDAI SATAFI D AT",
-            "thumbnail": "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/1.jpg",
-            "children": {
-              "type": "model_content",
-              "images": [
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/1.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/2.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/3.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/4.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/5.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/6.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI SATAFI D AT/7.jpg"
-              ]
-            }
-          },
-          {
             "name": "HYUNDAI TUCSON",
             "thumbnail": "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI TUCSON/1.jpg",
             "children": {
@@ -501,21 +464,6 @@
                 "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI TUCSON/4.jpg",
                 "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI TUCSON/5.jpg",
                 "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI TUCSON/6.jpg"
-              ]
-            }
-          },
-          {
-            "name": "HYUNDAI VERNA D",
-            "thumbnail": "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/1.jpg",
-            "children": {
-              "type": "model_content",
-              "images": [
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/1.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/2.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/3.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/4.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/5.jpg",
-                "/vehicles/4 WHEELERS/HYUNDAI/HYUNDAI VERNA D/6.jpg"
               ]
             }
           },
@@ -610,7 +558,7 @@
       },
       {
         "name": "ISUZU",
-        "thumbnail": "/vehicles/4 WHEELERS/ISUZU/thumbnail.jpg",
+        "thumbnail": "/vehicles/4 WHEELERS/ISUZU/thumbnail.png",
         "children": [
           {
             "name": "MU-7",
@@ -688,7 +636,7 @@
       },
       {
         "name": "JEEP",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/4 WHEELERS/JEEP/thumbnail.jpg",
         "children": [
           {
             "name": "JEEP COMPASS AT",
@@ -711,7 +659,7 @@
       },
       {
         "name": "KIA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/4 WHEELERS/KIA/thumbnail.png",
         "children": [
           {
             "name": "KIA CARENS PET AT",
@@ -1502,7 +1450,7 @@
       },
       {
         "name": "MG",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/4 WHEELERS/MG/thumbnail.png",
         "children": [
           {
             "name": "MG HECTOR",
@@ -1833,7 +1781,7 @@
       },
       {
         "name": "TATA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/4 WHEELERS/TATA/thumbnail.png",
         "children": [
           {
             "name": "HARRIER D AT",
@@ -2101,40 +2049,34 @@
                 "/vehicles/4 WHEELERS/VOLKSWAGEN/POLO GT/POLO GT1528611031.jpg"
               ]
             }
-          }
-        ]
-      },
-      {
-        "name": "VW",
-        "thumbnail": null,
-        "children": [
+          },
           {
             "name": "VENTO",
-            "thumbnail": "/vehicles/4 WHEELERS/VW/VENTO/1.jpg",
+            "thumbnail": "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/1.jpg",
             "children": {
               "type": "model_content",
               "images": [
-                "/vehicles/4 WHEELERS/VW/VENTO/1.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO/2.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO/3.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO/4.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO/5.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO/6.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO/7.jpg"
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/1.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/2.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/3.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/4.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/5.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/6.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO/7.jpg"
               ]
             }
           },
           {
             "name": "VENTO D MT",
-            "thumbnail": "/vehicles/4 WHEELERS/VW/VENTO D MT/1.jpg",
+            "thumbnail": "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO D MT/1.jpg",
             "children": {
               "type": "model_content",
               "images": [
-                "/vehicles/4 WHEELERS/VW/VENTO D MT/1.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO D MT/2.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO D MT/3.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO D MT/4.jpg",
-                "/vehicles/4 WHEELERS/VW/VENTO D MT/5.jpg"
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO D MT/1.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO D MT/2.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO D MT/3.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO D MT/4.jpg",
+                "/vehicles/4 WHEELERS/VOLKSWAGEN/VENTO D MT/5.jpg"
               ]
             }
           }
@@ -2148,7 +2090,7 @@
     "children": [
       {
         "name": "CNG BUS",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/6 WHEELERS/CNG BUS/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2165,7 +2107,7 @@
       },
       {
         "name": "FORCE CNG",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/6 WHEELERS/FORCE CNG/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2181,7 +2123,7 @@
       },
       {
         "name": "SCHOOL BUS",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/6 WHEELERS/SCHOOL BUS/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2204,42 +2146,54 @@
   },
   {
     "name": "DIESEL GENERATORS",
-    "thumbnail": "/vehicles/DIESEL GENERATORS/thumbnail.jpg",
+    "thumbnail": "/vehicles/DIESEL GENERATORS/thumbnail.jpg 5.jpeg",
     "children": [
       {
+        "name": "DG 1010KVA",
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 1010KVA/thumbnail.jpg.jpeg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/DIESEL GENERATORS/DG 1010KVA/WhatsApp Image 2026-03-31 at 2.22.00 PM.jpeg",
+            "/vehicles/DIESEL GENERATORS/DG 1010KVA/WhatsApp Image 2026-03-31 at 2.22.01 PM (1).jpeg",
+            "/vehicles/DIESEL GENERATORS/DG 1010KVA/WhatsApp Image 2026-03-31 at 2.22.01 PM (2).jpeg",
+            "/vehicles/DIESEL GENERATORS/DG 1010KVA/WhatsApp Image 2026-03-31 at 2.22.01 PM.jpeg"
+          ]
+        }
+      },
+      {
         "name": "DG 125 KVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 125 KVA/thumbnail.jpg.jpg",
         "children": {
           "type": "model_content",
           "images": [
             "/vehicles/DIESEL GENERATORS/DG 125 KVA/1.jpg",
-            "/vehicles/DIESEL GENERATORS/DG 125 KVA/2.jpg",
-            "/vehicles/DIESEL GENERATORS/DG 125 KVA/3.jpg",
-            "/vehicles/DIESEL GENERATORS/DG 125 KVA/4.jpg"
+            "/vehicles/DIESEL GENERATORS/DG 125 KVA/3.jpg"
           ]
         }
       },
       {
         "name": "DG 250 KVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 250 KVA/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [
-            "/vehicles/DIESEL GENERATORS/DG 250 KVA/1.jpg",
             "/vehicles/DIESEL GENERATORS/DG 250 KVA/2.jpg"
           ]
         }
       },
       {
         "name": "DG 500KVA",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/DIESEL GENERATORS/DG 500KVA/thumbnail.jpg.jpeg",
         "children": {
           "type": "model_content",
           "images": [
             "/vehicles/DIESEL GENERATORS/DG 500KVA/1.jpg",
             "/vehicles/DIESEL GENERATORS/DG 500KVA/2.jpg",
             "/vehicles/DIESEL GENERATORS/DG 500KVA/3.jpg",
-            "/vehicles/DIESEL GENERATORS/DG 500KVA/4.jpg"
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/4.jpg",
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/500 KVA 1.jpeg",
+            "/vehicles/DIESEL GENERATORS/DG 500KVA/500 KVA 2.jpeg"
           ]
         }
       }
@@ -2251,7 +2205,7 @@
     "children": [
       {
         "name": "Earth Movers CAT JCB",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/EARTH MOVERS/Earth Movers CAT JCB/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2272,8 +2226,23 @@
     "thumbnail": "/vehicles/TRUCKS/thumbnail.jpg",
     "children": [
       {
+        "name": "EICHER 12 TYRE",
+        "thumbnail": "/vehicles/TRUCKS/EICHER 12 TYRE/thumbnail.jpeg",
+        "children": {
+          "type": "model_content",
+          "images": [
+            "/vehicles/TRUCKS/EICHER 12 TYRE/WhatsApp Image 2026-03-31 at 2.19.20 PM.jpeg",
+            "/vehicles/TRUCKS/EICHER 12 TYRE/WhatsApp Image 2026-03-31 at 2.19.22 PM (1).jpeg",
+            "/vehicles/TRUCKS/EICHER 12 TYRE/WhatsApp Image 2026-03-31 at 2.19.22 PM.jpeg",
+            "/vehicles/TRUCKS/EICHER 12 TYRE/WhatsApp Image 2026-03-31 at 2.19.23 PM (1).jpeg",
+            "/vehicles/TRUCKS/EICHER 12 TYRE/WhatsApp Image 2026-03-31 at 2.19.23 PM.jpeg",
+            "/vehicles/TRUCKS/EICHER 12 TYRE/WhatsApp Image 2026-03-31 at 2.19.24 PM.jpeg"
+          ]
+        }
+      },
+      {
         "name": "TATA 393",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/TRUCKS/TATA 393/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [
@@ -2289,7 +2258,7 @@
       },
       {
         "name": "TATA 977",
-        "thumbnail": null,
+        "thumbnail": "/vehicles/TRUCKS/TATA 977/thumbnail.jpg",
         "children": {
           "type": "model_content",
           "images": [

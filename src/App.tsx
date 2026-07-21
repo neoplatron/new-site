@@ -16,6 +16,10 @@ import ChannelPartners from "./pages/ChannelPartners";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
+import GetStarted from "./pages/GetStarted";
+import FranchiseForm from "./pages/forms/FranchiseForm";
+import DistributionForm from "./pages/forms/DistributionForm";
+import InstallationForm from "./pages/forms/InstallationForm";
 
 function AppContent() {
   const location = useLocation();
@@ -35,6 +39,18 @@ function AppContent() {
         <Route path="/products/overview" element={<ProductOverview />} />
         <Route path="/products/kits" element={<Kits />} />
         <Route path="/partners" element={<ChannelPartners />} />
+
+        {/* Hidden routes: reachable only via direct URL, not linked in nav */}
+        <Route path="/get-started" element={<GetStarted />} />
+        <Route path="/get-started/franchise" element={<FranchiseForm />} />
+        <Route
+          path="/get-started/distribution"
+          element={<DistributionForm />}
+        />
+        <Route
+          path="/get-started/installation"
+          element={<InstallationForm />}
+        />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />

@@ -398,7 +398,7 @@ const FAQs = () => {
             </a>
 
             <a
-              href="tel:+919876543210"
+              href="tel:+917416493939"
               className="inline-flex items-center gap-2 bg-bg dark:bg-d-bg text-text dark:text-d-text font-semibold px-8 py-4 rounded-xl border-2 border-border dark:border-d-border hover:border-primary dark:hover:border-d-primary transition-all"
             >
               <MessageCircle className="w-5 h-5" />
