@@ -106,8 +106,8 @@ const Header = () => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-text dark:text-d-text
-                      hover:bg-bg-dark dark:hover:bg-d-bg-dark hover:text-primary dark:hover:text-d-primary
+                  className="px-3 py-2 rounded-md text-sm font-medium text-text dark:text-d-text 
+                      hover:bg-bg-dark dark:hover:bg-d-bg-dark hover:text-primary dark:hover:text-d-primary 
                       transition-colors"
                 >
                   <span className="relative inline-block">
