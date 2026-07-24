@@ -103,7 +103,7 @@ const FranchiseForm = () => {
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg text-bg-light/90 max-w-2xl mx-auto leading-relaxed">
-            Fill out the details below and our team will get in touch with you
+            Interested in becoming a Neoplatron franchise partner? Submit your details, and our team will contact you with complete franchise information.
           </p>
         </div>
 

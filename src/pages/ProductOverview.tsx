@@ -829,12 +829,12 @@ const ProductOverview: React.FC = () => {
             >
               View Product Kits
             </Link>
-            <a
-              href="/contact"
+            <Link
+              to="/get-started"
               className="bg-transparent border-2 border-white text-white px-6 sm:px-7 lg:px-8 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors text-sm sm:text-base"
             >
-              Contact Us
-            </a>
+              Get Started
+            </Link>
           </div>
         </div>
       </section>

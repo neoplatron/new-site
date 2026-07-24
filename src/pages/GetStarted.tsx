@@ -68,8 +68,8 @@ const GetStarted = () => {
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg text-bg-light/90 max-w-2xl mx-auto leading-relaxed">
-            Select the option that fits you best and fill out the form to get
-            started with us
+            Select the option that best matches your requirement. Complete a short form, and our team will review your enquiry and get back to you shortly.
+
           </p>
         </div>
 
@@ -131,8 +131,7 @@ const GetStarted = () => {
         </div>
 
         <p className="text-center text-xs sm:text-sm text-text-muted dark:text-d-text-muted mt-6">
-          Not sure which one fits? Any form gets you in front of our team —
-          we'll point you the right way.
+          Not sure which enquiry is right for you? Choose any option, and our team will guide you to the right solution.
         </p>
       </section>
     </div>

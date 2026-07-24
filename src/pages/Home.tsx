@@ -12,7 +12,15 @@ import {
   inhouse_logo,
   installations_logo,
 } from "../constants/images";
-import { ArrowRight, Award, Trophy } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  Trophy,
+  Wrench,
+  Store,
+  Truck,
+  Clock,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -483,6 +491,65 @@ const Home = () => {
           </div>
         </div>
 
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-8 sm:py-16 lg:py-24 relative overflow-hidden bg-bg dark:bg-d-bg">
+        {/* Background elements - matches Achievements section language */}
+        <div className="absolute top-0 left-0 w-1/3 h-full bg-linear-to-r from-primary/5 to-transparent skew-x-12"></div>
+        <div className="absolute bottom-0 right-0 w-1/3 h-full bg-linear-to-l from-secondary/5 to-transparent -skew-x-12"></div>
+
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <h2 className="font-title text-2xl sm:text-4xl lg:text-5xl font-bold text-text dark:text-d-text mb-4 sm:mb-6 leading-tight">
+            Ready to Improve Your{" "}
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">
+              Vehicle's Fuel Efficiency?
+            </span>
+          </h2>
+
+          <p className="text-base sm:text-lg text-text-para dark:text-d-text-para max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
+            Whether you're looking for an installation, dealership, or
+            franchise opportunity, we're here to help. Share your basic
+            details, and our team will review your inquiry and get back
+            to you shortly.
+          </p>
+
+          {/* Opportunity chips */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+            <div className="flex items-center gap-2 bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border rounded-full px-4 py-2">
+              <Wrench className="w-4 h-4 text-primary dark:text-d-primary" />
+              <span className="text-sm font-medium text-text dark:text-d-text">
+                Installation
+              </span>
+            </div>
+            <div className="flex items-center gap-2 bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border rounded-full px-4 py-2">
+              <Truck className="w-4 h-4 text-secondary dark:text-d-secondary" />
+              <span className="text-sm font-medium text-text dark:text-d-text">
+                Dealership
+              </span>
+            </div>
+            <div className="flex items-center gap-2 bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border rounded-full px-4 py-2">
+              <Store className="w-4 h-4 text-tertiary dark:text-d-tertiary" />
+              <span className="text-sm font-medium text-text dark:text-d-text">
+                Franchise
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+            <Link
+              to="/get-started"
+              className="group inline-flex items-center gap-3 bg-linear-to-r from-primary to-secondary hover:from-secondary hover:to-tertiary text-white font-button font-semibold px-7 py-3.5 md:px-9 md:py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105"
+            >
+              <span>Get Started</span>
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <div className="flex items-center gap-2 text-text-muted dark:text-d-text-muted text-xs sm:text-sm">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Takes less than 2 minutes &bull; No commitment required</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <SavingsCalculator />

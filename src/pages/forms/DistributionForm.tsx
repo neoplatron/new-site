@@ -103,8 +103,7 @@ const DistributionForm = () => {
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg text-bg-light/90 max-w-2xl mx-auto leading-relaxed">
-            Thank you for your interest in becoming an Authorized Neoplatron
-            Distributor or Dealer.
+            Become an authorized Neoplatron distributor or dealer. Share your business details, and we'll get in touch to discuss partnership opportunities.
           </p>
         </div>
 

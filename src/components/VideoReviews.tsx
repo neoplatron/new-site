@@ -8,7 +8,7 @@ export default function VideoReviews() {
     {
       id: 1,
       title: "Customer Review 1",
-      embedUrl: "https://www.youtube.com/embed/xJwKC9lfZt4?rel=0",
+      embedUrl: "https://www.youtube.com/embed/cU1yChtVtNw?rel=0",
     },
     {
       id: 2,
@@ -18,7 +18,7 @@ export default function VideoReviews() {
     {
       id: 3,
       title: "Customer Review 3",
-      embedUrl: "https://www.youtube.com/embed/Otxlahn03Vs?rel=0",
+      embedUrl: "https://www.youtube.com/embed/J2Q8GiNARAE?rel=0",
     },
   ];
 

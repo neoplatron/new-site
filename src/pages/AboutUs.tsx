@@ -999,6 +999,7 @@ const AboutUs = () => {
           </div>
         </div>
       </section>
+
       {/* Call to Action */}
       <section className="py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-primary text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -1016,12 +1017,12 @@ const AboutUs = () => {
             >
               Explore Our Products
             </Link>
-            <a
-              href="/contact"
+            <Link
+              to="/get-started"
               className="bg-transparent border-2 border-white text-white px-6 sm:px-7 lg:px-8 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors text-sm sm:text-base"
             >
-              Contact Us
-            </a>
+              Get Started
+            </Link>
           </div>
         </div>
       </section>

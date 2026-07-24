@@ -114,9 +114,7 @@ const InstallationForm = () => {
           </h1>
 
           <p className="text-sm sm:text-base lg:text-lg text-bg-light/90 max-w-2xl mx-auto leading-relaxed">
-            Thank you for your interest in the Neoplatron Green Hydrogen Kit.
-            Please fill out the form below, and our team will contact you
-            with compatibility, pricing, and installation details.
+            Looking to Install Neoplatron? Share your vehicle details, and our experts will assist you with compatibility, pricing, and Installation.
           </p>
         </div>
 
