@@ -214,7 +214,7 @@ const InstallationForm = () => {
                           required
                           value={formData.fullName}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                           placeholder="Your name here"
                         />
                       </div>
@@ -234,7 +234,7 @@ const InstallationForm = () => {
                           required
                           value={formData.mobileNumber}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                           placeholder="Your Phone number here"
                         />
                       </div>
@@ -254,7 +254,7 @@ const InstallationForm = () => {
                         required
                         value={formData.cityState}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                         placeholder="Which city&State are you from?"
                       />
                     </div>
@@ -299,7 +299,7 @@ const InstallationForm = () => {
                         required
                         value={formData.vehicleBrandModel}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                         placeholder="e.g. Hyundai i20"
                       />
                     </div>
@@ -367,7 +367,7 @@ const InstallationForm = () => {
                         rows={4}
                         value={formData.question}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all resize-none placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all resize-none placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                         placeholder="e.g. Will this work with my car's turbo diesel engine?"
                       />
                     </div>

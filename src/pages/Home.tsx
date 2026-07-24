@@ -16,9 +16,6 @@ import {
   ArrowRight,
   Award,
   Trophy,
-  Wrench,
-  Store,
-  Truck,
   Clock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -417,11 +414,7 @@ const Home = () => {
       </section>
 
       {/* Our Achievements Section */}
-      <section className="py-8 sm:py-16 lg:py-24 relative overflow-hidden bg-bg dark:bg-d-bg">
-        {/* Background elements */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-primary/5 to-transparent skew-x-12"></div>
-        <div className="absolute bottom-0 left-0 w-1/3 h-full bg-linear-to-r from-secondary/5 to-transparent -skew-x-12"></div>
-
+      <section className="py-8 sm:py-16 lg:py-24 relative overflow-hidden bg-bg-dark dark:bg-d-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-8 sm:mb-16 lg:mb-20">
             <h2 className="font-title text-3xl sm:text-4xl lg:text-5xl font-bold text-text dark:text-d-text mb-4 sm:mb-6">
@@ -494,11 +487,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-8 sm:py-16 lg:py-24 relative overflow-hidden bg-bg dark:bg-d-bg">
-        {/* Background elements - matches Achievements section language */}
-        <div className="absolute top-0 left-0 w-1/3 h-full bg-linear-to-r from-primary/5 to-transparent skew-x-12"></div>
-        <div className="absolute bottom-0 right-0 w-1/3 h-full bg-linear-to-l from-secondary/5 to-transparent -skew-x-12"></div>
-
+      <section className="py-8 sm:py-16 lg:py-24 relative overflow-hidden bg-bg-dark dark:bg-d-bg-dark">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h2 className="font-title text-2xl sm:text-4xl lg:text-5xl font-bold text-text dark:text-d-text mb-4 sm:mb-6 leading-tight">
             Ready to Improve Your{" "}
@@ -513,28 +502,6 @@ const Home = () => {
             details, and our team will review your inquiry and get back
             to you shortly.
           </p>
-
-          {/* Opportunity chips */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10">
-            <div className="flex items-center gap-2 bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border rounded-full px-4 py-2">
-              <Wrench className="w-4 h-4 text-primary dark:text-d-primary" />
-              <span className="text-sm font-medium text-text dark:text-d-text">
-                Installation
-              </span>
-            </div>
-            <div className="flex items-center gap-2 bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border rounded-full px-4 py-2">
-              <Truck className="w-4 h-4 text-secondary dark:text-d-secondary" />
-              <span className="text-sm font-medium text-text dark:text-d-text">
-                Dealership
-              </span>
-            </div>
-            <div className="flex items-center gap-2 bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border rounded-full px-4 py-2">
-              <Store className="w-4 h-4 text-tertiary dark:text-d-tertiary" />
-              <span className="text-sm font-medium text-text dark:text-d-text">
-                Franchise
-              </span>
-            </div>
-          </div>
 
           <div className="flex flex-col items-center gap-4">
             <Link

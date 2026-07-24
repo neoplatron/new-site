@@ -170,7 +170,7 @@ const FranchiseForm = () => {
                           required
                           value={formData.fullName}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                           placeholder="Ravi Kumar"
                         />
                       </div>
@@ -190,7 +190,7 @@ const FranchiseForm = () => {
                           required
                           value={formData.mobileNumber}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                           placeholder="98765 43210"
                         />
                       </div>
@@ -211,7 +211,7 @@ const FranchiseForm = () => {
                           required
                           value={formData.email}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                           placeholder="ravi.kumar@gmail.com"
                         />
                       </div>
@@ -231,7 +231,7 @@ const FranchiseForm = () => {
                           required
                           value={formData.cityState}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                           placeholder="Vijayawada, Andhra Pradesh"
                         />
                       </div>
@@ -252,7 +252,7 @@ const FranchiseForm = () => {
                         required
                         value={formData.territory}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted dark:placeholder:text-d-text-muted"
+                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
                         placeholder="Krishna, Guntur, or nearby districts"
                       />
                     </div>
