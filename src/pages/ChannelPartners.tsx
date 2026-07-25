@@ -2,6 +2,7 @@ import { MapPin, Phone, Globe } from "lucide-react";
 import SEO from "../components/SEO";
 
 const ChannelPartners = () => {
+  // Static partner directory; update here when onboarding/removing a partner
   const partners = [
     {
       id: 1,
@@ -37,7 +38,7 @@ const ChannelPartners = () => {
         keywords="channel partners, Neoplatron partners, global partners, regional partner india, bangladesh partner"
       />
 
-      {/* Hero Section */}
+      {/* Hero Section: intro banner with page title and blurb */}
       <section className="relative bg-linear-to-br from-primary via-secondary to-primary text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-48 h-48 sm:w-64 sm:h-64 bg-white rounded-full blur-3xl"></div>
@@ -65,7 +66,7 @@ const ChannelPartners = () => {
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-bg to-transparent"></div>
       </section>
 
-      {/* Partners List Section */}
+      {/* Partners List Section: card grid, one card per partner */}
       <section className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -74,7 +75,7 @@ const ChannelPartners = () => {
                 key={partner.id}
                 className="bg-bg-light dark:bg-d-bg-light rounded-2xl border border-border dark:border-d-border shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group flex flex-col"
               >
-                {/* Image Gallery Header */}
+                {/* Image Gallery Header: single logo/photo, or side-by-side split for multiple images */}
                 <div className={`relative h-64 sm:h-80 flex ${partner.isLogo ? 'bg-white dark:bg-white' : 'bg-bg-dark/50 dark:bg-d-bg-dark/50'}`}>
                   {partner.images.length === 1 ? (
                     <img

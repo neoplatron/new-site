@@ -19,7 +19,7 @@ const Footer = () => {
     { name: "About Us", path: "/about" },
     { name: "Products", path: "/products/overview" },
     { name: "Gallery", path: "/gallery" },
-    { name: "Partners", path: "/partners" },
+    // { name: "Partners", path: "/partners" }, // removed from nav, page still reachable via direct URL
   ];
 
   const supportLinks = [

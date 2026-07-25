@@ -25,7 +25,7 @@ const Header = () => {
     { name: "Gallery", path: "/gallery" },
     { name: "FAQ's", path: "/faqs" },
     { name: "Warranty", path: "/warranty" },
-    { name: "Partners", path: "/partners" },
+    // { name: "Partners", path: "/partners" }, // removed from nav, page still reachable via direct URL
     { name: "Contact Us", path: "/contact" },
   ];
 
