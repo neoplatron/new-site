@@ -46,7 +46,7 @@ const AboutUs = () => {
     { value: "19+", label: "Years of Research" },
     { value: "70% - 100%", label: "Fuel Efficiency" },
     { value: "80% - 90%", label: "Emission Reduction" },
-    { value: "23,000+", label: "Installations" },
+    { value: "26,000+", label: "Installations" },
   ];
 
   return (
