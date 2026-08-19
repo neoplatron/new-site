@@ -6,7 +6,7 @@ import Logo from "./Logo";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -25,7 +25,16 @@ const Header = () => {
     { name: "Gallery", path: "/gallery" },
     { name: "FAQ's", path: "/faqs" },
     { name: "Warranty", path: "/warranty" },
-    // { name: "Partners", path: "/partners" }, // removed from nav, page still reachable via direct URL
+    {
+      name: "Partners",
+      path: "/partners",
+      hasDropdown: true,
+      dropdownItems: [
+        { name: "Distributors", path: "/partners/distributors" },
+        { name: "Dealers", path: "/partners/dealers" },
+        { name: "Franchise", path: "/partners/franchise" },
+      ],
+    },
     { name: "Contact Us", path: "/contact" },
   ];
 
@@ -36,7 +45,7 @@ const Header = () => {
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
-        setIsProductsDropdownOpen(false);
+        setOpenDropdown(null);
       }
     };
 
@@ -63,32 +72,33 @@ const Header = () => {
                   key={item.name}
                   className="relative"
                   ref={dropdownRef}
-                  onMouseEnter={() => setIsProductsDropdownOpen(true)}
-                  onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                  onMouseEnter={() => setOpenDropdown(item.name)}
+                  onMouseLeave={() => setOpenDropdown(null)}
                 >
                   <Link
                     to={item.path}
-                    className="px-3 py-2 rounded-lg text-sm font-medium text-text dark:text-d-text 
-                        hover:bg-bg-dark dark:hover:bg-d-bg-dark hover:text-primary dark:hover:text-d-primary 
+                    className="px-3 py-2 rounded-lg text-sm font-medium text-text dark:text-d-text
+                        hover:bg-bg-dark dark:hover:bg-d-bg-dark hover:text-primary dark:hover:text-d-primary
                         transition-colors flex items-center gap-1"
                   >
                     <span className="relative inline-block">
                       {item.name}
                       {(location.pathname === item.path ||
-                        location.pathname.startsWith("/products/")) && (
+                        (item.name === "Products" &&
+                          location.pathname.startsWith("/products/"))) && (
                         <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-tertiary dark:bg-d-tertiary"></span>
                       )}
                     </span>
                     <ChevronDown
                       size={16}
                       className={`transition-transform ${
-                        isProductsDropdownOpen ? "rotate-180" : ""
+                        openDropdown === item.name ? "rotate-180" : ""
                       }`}
                     />
                   </Link>
 
                   {/* Dropdown Menu */}
-                  {isProductsDropdownOpen && (
+                  {openDropdown === item.name && (
                     <div className="absolute top-8 left-0 mt-1 w-48 bg-bg dark:bg-d-bg border border-border dark:border-d-border rounded-lg shadow-lg py-1">
                       {item.dropdownItems?.map((dropdownItem) => (
                         <Link
@@ -147,7 +157,7 @@ const Header = () => {
                       dark:text-d-text hover:bg-bg-light dark:hover:bg-d-bg-light 
                       hover:text-primary dark:hover:text-d-primary transition-colors relative ${
                         location.pathname === item.path ||
-                        (item.hasDropdown &&
+                        (item.name === "Products" &&
                           location.pathname.startsWith("/products/"))
                           ? "border-l-4 border-tertiary dark:border-d-tertiary"
                           : ""

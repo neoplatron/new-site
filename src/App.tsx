@@ -12,7 +12,10 @@ import ProductOverview from "./pages/ProductOverview";
 import Kits from "./pages/Kits";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
-// import ChannelPartners from "./pages/ChannelPartners"; // route disabled below
+import ChannelPartners from "./pages/ChannelPartners";
+import Dealers from "./pages/Dealers";
+import Distributors from "./pages/Distributors";
+import Franchise from "./pages/Franchise";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
@@ -39,7 +42,10 @@ function AppContent() {
         <Route path="/products/overview" element={<ProductOverview />} />
         <Route path="/products/kits" element={<Kits />} />
 
-        {/* <Route path="/partners" element={<ChannelPartners />} /> removed from nav and disabled, now 404s */}
+        <Route path="/partners" element={<ChannelPartners />} />
+        <Route path="/partners/dealers" element={<Dealers />} />
+        <Route path="/partners/distributors" element={<Distributors />} />
+        <Route path="/partners/franchise" element={<Franchise />} />
 
         {/* Hidden routes: reachable only via direct URL, not linked in nav */}
         <Route path="/get-started" element={<GetStarted />} />
