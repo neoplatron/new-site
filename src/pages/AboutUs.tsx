@@ -37,7 +37,7 @@ const AboutUs = () => {
       event:
         "First ICAT Certification, ISO Certification, Patent applications filed",
     },
-    { year: "2025", event: "23,000+ installations completed across India" },
+    { year: "2025", event: "26,000+ installations completed across India" },
   ];
 
 
@@ -46,7 +46,7 @@ const AboutUs = () => {
     { value: "19+", label: "Years of Research" },
     { value: "70% - 100%", label: "Fuel Efficiency" },
     { value: "80% - 90%", label: "Emission Reduction" },
-    { value: "23,000+", label: "Installations" },
+    { value: "26,000+", label: "Installations" },
   ];
 
   return (
