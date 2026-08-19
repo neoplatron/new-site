@@ -19,15 +19,7 @@ const Footer = () => {
     { name: "About Us", path: "/about" },
     { name: "Products", path: "/products/overview" },
     { name: "Gallery", path: "/gallery" },
-    {
-      name: "Partners",
-      path: "/partners",
-      children: [
-        { name: "Distributors", path: "/partners/distributors" },
-        { name: "Dealers", path: "/partners/dealers" },
-        { name: "Franchise", path: "/partners/franchise" },
-      ],
-    },
+    { name: "Partners", path: "/partners" },
   ];
 
   const supportLinks = [
@@ -152,26 +144,6 @@ const Footer = () => {
                       ></span>
                       {link.name}
                     </Link>
-                    {link.children && (
-                      <ul className="mt-2 ml-4 space-y-2">
-                        {link.children.map((child) => (
-                          <li key={child.name}>
-                            <Link
-                              to={child.path}
-                              className="text-sm text-text-para/80 dark:text-d-text-para/80
-                                 hover:text-primary dark:hover:text-d-primary
-                                 transition-colors inline-flex items-center group"
-                            >
-                              <span
-                                className="w-0 group-hover:w-2 h-0.5 bg-primary dark:bg-d-primary
-                                       transition-all duration-300 mr-0 group-hover:mr-2"
-                              ></span>
-                              {child.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </li>
                 ))}
               </ul>

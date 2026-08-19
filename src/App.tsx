@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -12,10 +12,7 @@ import ProductOverview from "./pages/ProductOverview";
 import Kits from "./pages/Kits";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
-import ChannelPartners from "./pages/ChannelPartners";
-import Dealers from "./pages/Dealers";
-import Distributors from "./pages/Distributors";
-import Franchise from "./pages/Franchise";
+import Partners from "./pages/Partners";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
@@ -42,10 +39,10 @@ function AppContent() {
         <Route path="/products/overview" element={<ProductOverview />} />
         <Route path="/products/kits" element={<Kits />} />
 
-        <Route path="/partners" element={<ChannelPartners />} />
-        <Route path="/partners/dealers" element={<Dealers />} />
-        <Route path="/partners/distributors" element={<Distributors />} />
-        <Route path="/partners/franchise" element={<Franchise />} />
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/partners/dealers" element={<Navigate to="/partners" replace />} />
+        <Route path="/partners/distributors" element={<Navigate to="/partners" replace />} />
+        <Route path="/partners/franchise" element={<Navigate to="/partners" replace />} />
 
         {/* Hidden routes: reachable only via direct URL, not linked in nav */}
         <Route path="/get-started" element={<GetStarted />} />

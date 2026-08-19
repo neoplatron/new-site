@@ -25,16 +25,7 @@ const Header = () => {
     { name: "Gallery", path: "/gallery" },
     { name: "FAQ's", path: "/faqs" },
     { name: "Warranty", path: "/warranty" },
-    {
-      name: "Partners",
-      path: "/partners",
-      hasDropdown: true,
-      dropdownItems: [
-        { name: "Distributors", path: "/partners/distributors" },
-        { name: "Dealers", path: "/partners/dealers" },
-        { name: "Franchise", path: "/partners/franchise" },
-      ],
-    },
+    { name: "Partners", path: "/partners" },
     { name: "Contact Us", path: "/contact" },
   ];
 
@@ -153,8 +144,8 @@ const Header = () => {
                 <Link
                   to={item.path}
                   onClick={() => !item.hasDropdown && setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium text-text 
-                      dark:text-d-text hover:bg-bg-light dark:hover:bg-d-bg-light 
+                  className={`block px-3 py-2 rounded-md text-base font-medium text-text
+                      dark:text-d-text hover:bg-bg-light dark:hover:bg-d-bg-light
                       hover:text-primary dark:hover:text-d-primary transition-colors relative ${
                         location.pathname === item.path ||
                         (item.name === "Products" &&
