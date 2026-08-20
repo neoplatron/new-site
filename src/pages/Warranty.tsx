@@ -16,8 +16,15 @@ import {
   ArrowLeft,
   Loader2,
   ShieldCheck,
+  Download,
+  MapPin,
+  Phone,
+  Mail,
+  Fuel,
+  Gauge,
+  Store,
 } from "lucide-react";
-import { supabase } from "../integrations/supabase/client";
+import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "../integrations/supabase/client";
 import { validateSellerCode, searchWarranty } from "../api/warrantyAPI";
 import SimpleCaptcha from "../components/SimpleCaptcha";
 import SEO from "../components/SEO";
@@ -45,11 +52,28 @@ interface WarrantyData {
   customer_name: string;
   email: string;
   phone: string;
+  customer_address?: string;
+  city?: string;
+  state?: string;
+  pin_code?: string;
   registration_date: string;
   installation_date: string;
+  invoice_number?: string;
+  installed_by?: string;
+  seller_code_used?: string;
+  garage_name?: string;
   product_type: string;
   vehicle_number?: string;
+  fuel_type?: string;
+  kms_driven?: number;
 }
+
+const formatDisplayDate = (value?: string | null): string => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString();
+};
 
 // ==================== CONSTANTS ====================
 const WARRANTY_PERIOD_YEARS = 1; // Configurable warranty period
@@ -512,6 +536,38 @@ const RegistrationForm = ({
 
       if (error) throw error;
 
+      const expiryDate = new Date(formData.installationDate);
+      expiryDate.setFullYear(expiryDate.getFullYear() + WARRANTY_PERIOD_YEARS);
+
+      supabase.functions
+        .invoke("send-warranty-email", {
+          body: {
+            email: formData.email,
+            customerName: formData.customerName,
+            phone: formData.phone,
+            customerAddress: formData.customerAddress,
+            city: formData.city,
+            state: formData.state,
+            pinCode: formData.pinCode,
+            verificationUid: uid,
+            warrantyType: mode,
+            productType: formData.productType,
+            vehicleNumber: mode === "vehicle" ? formData.vehicleNumber.toUpperCase() : null,
+            fuelType: mode === "vehicle" ? formData.fuelType : null,
+            kmsDriven: mode === "vehicle" ? formData.kmsDriven : null,
+            installationDate: formData.installationDate,
+            invoiceNumber: formData.invoiceNumber,
+            installedBy: formData.installedBy,
+            sellerCode: formData.sellerCode,
+            registrationDate: new Date().toISOString(),
+            expiryDate: expiryDate.toISOString(),
+            garageName: formData.garageName,
+          },
+        })
+        .catch((emailError) => {
+          console.error("Failed to send warranty email:", emailError);
+        });
+
       setGeneratedUID(uid);
       setSubmitStatus("success");
     } catch (error) {
@@ -942,6 +998,64 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
   const [multiResults, setMultiResults] = useState<WarrantyData[]>([]);
   const [error, setError] = useState("");
   const [showClaimForm, setShowClaimForm] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadCard = async () => {
+    if (!warrantyData) return;
+
+    setIsDownloading(true);
+    try {
+      const expiryDate = new Date(warrantyData.installation_date);
+      expiryDate.setFullYear(expiryDate.getFullYear() + WARRANTY_PERIOD_YEARS);
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-warranty-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          action: "download",
+          email: warrantyData.email,
+          customerName: warrantyData.customer_name,
+          phone: warrantyData.phone,
+          customerAddress: warrantyData.customer_address,
+          city: warrantyData.city,
+          state: warrantyData.state,
+          pinCode: warrantyData.pin_code,
+          verificationUid: warrantyData.verification_uid,
+          warrantyType: warrantyData.warranty_type,
+          productType: warrantyData.product_type,
+          vehicleNumber: warrantyData.vehicle_number,
+          fuelType: warrantyData.fuel_type,
+          kmsDriven: warrantyData.kms_driven,
+          installationDate: warrantyData.installation_date,
+          invoiceNumber: warrantyData.invoice_number,
+          installedBy: warrantyData.installed_by,
+          sellerCode: warrantyData.seller_code_used,
+          registrationDate: warrantyData.registration_date,
+          expiryDate: expiryDate.toISOString(),
+          garageName: warrantyData.garage_name,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate warranty card");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `warranty-card-${warrantyData.verification_uid}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading warranty card:", err);
+      setError("Failed to download warranty card. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handleCheck = async () => {
     if (!uid.trim()) {
@@ -1017,7 +1131,7 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
                 </div>
                 <div className="text-sm text-text-muted dark:text-d-text-muted flex gap-4">
                   <span className="font-mono">{warranty.verification_uid}</span>
-                  <span>Installed: {new Date(warranty.installation_date).toLocaleDateString()}</span>
+                  <span>Installed: {formatDisplayDate(warranty.installation_date)}</span>
                 </div>
               </button>
             )
@@ -1111,14 +1225,62 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
             </div>
           </div>
 
-          {/* Details */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <InfoItem icon={User} label="Customer Name" value={warrantyData.customer_name} />
-            <InfoItem icon={FileText} label="Verification UID" value={warrantyData.verification_uid} />
-            <InfoItem icon={Calendar} label="Registration Date" value={new Date(warrantyData.registration_date).toLocaleDateString()} />
-            <InfoItem icon={Calendar} label="Installation Date" value={new Date(warrantyData.installation_date).toLocaleDateString()} />
-            <InfoItem icon={Clock} label="Expiry Date" value={warrantyStatus?.expiryDate.toLocaleDateString() || "-"} />
-            <InfoItem icon={mode === "vehicle" ? Car : Wrench} label="Product Type" value={warrantyData.product_type} />
+          {/* Customer Details */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted dark:text-d-text-muted mb-3">
+              Customer Details
+            </h4>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <InfoItem icon={User} label="Customer Name" value={warrantyData.customer_name} />
+              <InfoItem icon={Phone} label="Phone" value={warrantyData.phone} />
+              <InfoItem icon={Mail} label="Email" value={warrantyData.email} />
+              <InfoItem icon={MapPin} label="Address" value={warrantyData.customer_address || "-"} />
+              <InfoItem icon={MapPin} label="City" value={warrantyData.city || "-"} />
+              <InfoItem icon={MapPin} label="State / PIN Code" value={`${warrantyData.state || "-"} - ${warrantyData.pin_code || "-"}`} />
+            </div>
+          </div>
+
+          {/* Installation & Seller Details */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted dark:text-d-text-muted mb-3">
+              Installation & Seller Details
+            </h4>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <InfoItem icon={Calendar} label="Installation Date" value={formatDisplayDate(warrantyData.installation_date)} />
+              <InfoItem icon={FileText} label="Invoice Number" value={warrantyData.invoice_number || "-"} />
+              <InfoItem icon={Wrench} label="Installed By" value={warrantyData.installed_by || "-"} />
+              <InfoItem icon={Store} label="Seller Code" value={warrantyData.seller_code_used || "-"} />
+              <InfoItem icon={Store} label="Garage / Seller Name" value={warrantyData.garage_name || "-"} />
+            </div>
+          </div>
+
+          {/* Product Details */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted dark:text-d-text-muted mb-3">
+              Product Details
+            </h4>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <InfoItem icon={mode === "vehicle" ? Car : Wrench} label="Product Type" value={warrantyData.product_type} />
+              {mode === "vehicle" && (
+                <>
+                  <InfoItem icon={Car} label="Vehicle Number" value={warrantyData.vehicle_number || "-"} />
+                  <InfoItem icon={Fuel} label="Fuel Type" value={warrantyData.fuel_type || "-"} />
+                  <InfoItem icon={Gauge} label="Kms Driven at Installation" value={warrantyData.kms_driven ? `${warrantyData.kms_driven} km` : "-"} />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Warranty Validity */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted dark:text-d-text-muted mb-3">
+              Warranty Validity
+            </h4>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <InfoItem icon={FileText} label="Verification UID" value={warrantyData.verification_uid} />
+              <InfoItem icon={Calendar} label="Registration Date" value={formatDisplayDate(warrantyData.registration_date)} />
+              <InfoItem icon={Clock} label="Expiry Date" value={warrantyStatus?.expiryDate.toLocaleDateString() || "-"} />
+            </div>
           </div>
 
           {/* Actions */}
@@ -1128,6 +1290,23 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
               className="flex-1 px-6 py-3 border border-border dark:border-d-border rounded-lg text-text dark:text-d-text hover:bg-bg dark:hover:bg-d-bg transition-colors"
             >
               Check Another
+            </button>
+            <button
+              onClick={handleDownloadCard}
+              disabled={isDownloading}
+              className="flex-1 px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Preparing...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5" />
+                  Download Warranty Card
+                </>
+              )}
             </button>
             {warrantyStatus?.valid && (
               <button
