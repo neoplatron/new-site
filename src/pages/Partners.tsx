@@ -115,7 +115,7 @@ const PARTNERS: Partner[] = [
     id: "distributor-1",
     type: "distributor",
     name: "Srinivas Chowdary",
-    city: "East Godavari",
+    city: "East/West Godavari",
     state: "Andhra Pradesh",
     phone: "+91 91543 44771",
     address:
