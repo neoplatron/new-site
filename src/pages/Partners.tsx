@@ -125,9 +125,10 @@ const PARTNERS: Partner[] = [
   {
     id: "franchise-1",
     type: "franchise",
-    name: "K. Chakradhar",
+    name: "Green OS Hydrogen Technologies Pvt Ltd",
     city: "Vijayawada",
     state: "Andhra Pradesh",
+    contactPerson: "K. Chakradhar",
     phone: "+91 99661 51436",
     address: "HIG 372, H B Colony, Bhavanipuram, Vijayawada - 520012",
     mapsUrl: "https://maps.app.goo.gl/tGGAbPxx1R1dhwUC6",
