@@ -36,6 +36,12 @@ const Footer = () => {
       href: "tel:+917416493939",
     },
     {
+      icon: Phone,
+      label: "Phone",
+      value: "+91 99892 66767",
+      href: "tel:+919989266767",
+    },
+    {
       icon: Mail,
       label: "Email",
       value: "info@neoplatron.com",
@@ -184,7 +190,7 @@ const Footer = () => {
                 {contactInfo.map((contact) => {
                   const Icon = contact.icon;
                   return (
-                    <li key={contact.label}>
+                    <li key={contact.value}>
                       <a
                         href={contact.href}
                         target={
