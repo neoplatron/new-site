@@ -13,6 +13,7 @@ import Kits from "./pages/Kits";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Partners from "./pages/Partners";
+import Locations from "./pages/Locations";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
@@ -40,6 +41,7 @@ function AppContent() {
         <Route path="/products/kits" element={<Kits />} />
 
         <Route path="/partners" element={<Partners />} />
+        <Route path="/locations" element={<Locations />} />
         <Route path="/partners/dealers" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/distributors" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/franchise" element={<Navigate to="/partners" replace />} />
