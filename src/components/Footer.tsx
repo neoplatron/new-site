@@ -35,12 +35,12 @@ const Footer = () => {
       value: "+91 74164 93939",
       href: "tel:+917416493939",
     },
-    {
+    /*{
       icon: Phone,
       label: "Phone",
       value: "+91 99892 66767",
       href: "tel:+919989266767",
-    },
+    },*/
     {
       icon: Mail,
       label: "Email",
