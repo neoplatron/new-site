@@ -60,7 +60,7 @@ const Home = () => {
     },
     {
       icon: <img src={installations_logo} alt="Installations" className="w-full h-full object-contain" />,
-      title: "23,000+ Installations",
+      title: "26,000+ Installations",
       desc: "Proven track record across India",
     },
   ];

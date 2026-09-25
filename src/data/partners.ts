@@ -119,18 +119,6 @@ export const PARTNERS: Partner[] = [
       "https://www.google.com/maps/search/?api=1&query=16%2F8%2C+Periya+Thoattam%2C+Ondikkaranpalayam%2C+Villarasampatti%2C+Erode+-+638012",
   },
   {
-    id: "dealer-3",
-    type: "dealer",
-    name: "HydroTorque Energy",
-    city: "Erode",
-    state: "Tamil Nadu",
-    contactPerson: "Gowthaman Vetrikannan",
-    phone: "+91 96298 94842",
-    address: "16/8 Periya Thoattam, Ondikkarampalayam, Villarasampatti, Erode district, Tamil Nadu - 638107",
-    mapsUrl:
-      "https://www.google.com/maps/search/?api=1&query=16%2F8+Periya+Thoattam%2C+Ondikkarampalayam%2C+Villarasampatti%2C+Erode+district%2C+Tamil+Nadu+-+638107",
-  },
-  {
     id: "dealer-4",
     type: "dealer",
     name: "HydroTorque Energy",

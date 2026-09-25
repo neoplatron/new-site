@@ -8,7 +8,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 // import { Mail, MapPin, Phone, Send, ArrowRight } from "lucide-react";
-// import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 // import { contactUs } from "../constants/illustrations";
 // import Lottie from "lottie-react";
@@ -396,6 +396,19 @@ const ContactUs = () => {
 
       {/* Map Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16">
+        <div className="flex justify-center mb-8 sm:mb-10">
+          <Link
+            to="/locations"
+            className="group relative inline-flex items-center gap-2 bg-linear-to-r from-primary to-secondary hover:from-secondary hover:to-primary
+                     text-white font-semibold py-3.5 px-8 rounded-xl
+                     focus:outline-none focus:ring-4 focus:ring-primary/20
+                     transition-all shadow-lg hover:shadow-2xl hover:scale-[1.02]"
+          >
+            Find Your Authorized Nearby Location
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
         <div className="relative group">
           <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-secondary/20 rounded-2xl sm:rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
