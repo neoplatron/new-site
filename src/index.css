@@ -113,3 +113,14 @@ html.dark body {
 html.light body {
   background-color: var(--color-bg);
 }
+
+@keyframes popup-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes popup-timer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.animate-popup-in { animation: popup-in 0.35s ease-out both; }
+.animate-popup-timer { animation: popup-timer 20s linear forwards; transform-origin: left; }

@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Partners from "./pages/Partners";
 import Locations from "./pages/Locations";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PartnerPopup from "./components/PartnerPopup";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
 import GetStarted from "./pages/GetStarted";
@@ -71,6 +72,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isAdminRequest && <Footer />}
+      {!isAdminRequest && <PartnerPopup />}
     </div>
   );
 }
