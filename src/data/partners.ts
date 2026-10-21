@@ -8,6 +8,7 @@ export interface Partner {
   state: string;
   contactPerson?: string;
   phone?: string;
+  landline?: string;
   address: string;
   mapsUrl: string;
 }
@@ -98,11 +99,11 @@ export const PARTNERS: Partner[] = [
     id: "distributor-1",
     type: "distributor",
     name: "Srinivas Chowdary",
-    city: "East/West Godavari",
+    city: "West Godavari",
     state: "Andhra Pradesh",
     phone: "+91 91543 44771",
     address:
-      "Thirumala Apartment, Ground Floor, Pothavaram Road, East Godavari Dt, Andhra Pradesh - 543112",
+      "Thirumala Apartment, Ground Floor, Pothavaram Road, West Godavari Dt, Andhra Pradesh - 543112",
     mapsUrl: "https://maps.app.goo.gl/FhuJfCAEfsJYWen47?g_st=aw",
   },
   {
@@ -125,7 +126,8 @@ export const PARTNERS: Partner[] = [
     city: "Vijayawada",
     state: "Andhra Pradesh",
     contactPerson: "K. Chakradhar",
-    phone: "+91 86631 51759",
+    phone: "+91 99661 51436",
+    landline: "0866-3151759",
     address: "Shop no. 275, Iron Complex, Urmila Subbarao Nagar, Jojinagar, Bhavanipuram, Vijayawada, Andhra Pradesh 520012",
     mapsUrl: "https://maps.app.goo.gl/MgUGmzoj2LqmPGGR7",
   },

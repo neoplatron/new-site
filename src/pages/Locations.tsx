@@ -138,6 +138,18 @@ const Locations = () => {
                         </div>
                       )}
 
+                      {partner.landline && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="w-5 h-5 text-text-muted dark:text-d-text-muted shrink-0" />
+                          <a
+                            href={`tel:${partner.landline}`}
+                            className="text-sm font-medium text-text dark:text-d-text"
+                          >
+                            {partner.landline} (Landline)
+                          </a>
+                        </div>
+                      )}
+
                       <div className="mt-auto flex flex-col xs:flex-row gap-2.5 pt-1">
                         {partner.phone && (
                           <a
