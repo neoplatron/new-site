@@ -791,6 +791,10 @@ export default function AdminDashboard() {
                                                             <a href={photo.url} target="_blank" rel="noopener noreferrer" className="w-24 h-24 rounded-lg border border-border dark:border-d-border hover:border-primary transition-colors bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xs text-primary text-center p-1">
                                                                 Open in Drive
                                                             </a>
+                                                        ) : !photo.data ? (
+                                                            <div className="w-24 h-24 rounded-lg border border-dashed border-border dark:border-d-border flex items-center justify-center text-xs text-text-muted text-center p-1">
+                                                                Upload failed
+                                                            </div>
                                                         ) : (
                                                             <a href={photo.data} download={photo.name || `photo_${idx}.jpg`} className="block w-24 h-24 rounded-lg overflow-hidden border border-border dark:border-d-border hover:border-primary transition-colors bg-gray-50 dark:bg-gray-800">
                                                                 <img src={photo.data} alt={photo.label || `Installation ${idx + 1}`} className="w-full h-full object-cover" />

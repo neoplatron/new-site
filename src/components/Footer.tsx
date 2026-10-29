@@ -225,6 +225,7 @@ const Footer = () => {
           <div className="flex justify-center items-center">
             {/* Copyright */}
             <p className="text-sm text-text-para dark:text-d-text-para text-center">
+              <Link to="/privacy" className="hover:underline">Privacy Policy</Link> | <Link to="/terms" className="hover:underline">Terms of Service</Link> | 
               © {currentYear} Neoplatron. All rights reserved. Designed and Developed by <a href="https://www.creathy.in" target="_blank" rel="noopener noreferrer" className="text-primary dark:text-d-primary hover:underline">Creathy</a>
             </p>
           </div>

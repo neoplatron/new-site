@@ -328,6 +328,7 @@ const RegistrationForm = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedUID, setGeneratedUID] = useState<string | null>(null);
+  const [failedUploads, setFailedUploads] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -587,27 +588,34 @@ const RegistrationForm = ({
         install_product_type: formData.installProductType,
         fuel_type: mode === "vehicle" ? formData.fuelType : null,
         kms_driven: mode === "vehicle" && formData.kmsDriven ? parseInt(formData.kmsDriven) : null,
-        invoice_data: invoiceBase64,
-        vehicle_rc_data: vehicleRCBase64,
-        installation_photos: garagePicsBase64,
+        invoice_data: null,
+        vehicle_rc_data: null,
+        // Only metadata here; the image files themselves go to Google Drive.
+        installation_photos: garagePicsBase64.map(({ data: _data, ...meta }) => meta),
       });
 
       if (error) throw error;
 
-      // Move the files to Google Drive (one request per file). The base64 copy saved above is
-      // the fallback, so a Drive failure never fails the registration.
+      // Files go straight to Google Drive (one request per file, retried up to 3 times).
       const driveUploads = [
         invoiceBase64 && files.invoice && { slot: "invoice", label: `Invoice ${formData.invoiceNumber}`, file: files.invoice, data: invoiceBase64 },
         vehicleRCBase64 && files.vehicleRC && { slot: "rc", label: "Vehicle RC", file: files.vehicleRC, data: vehicleRCBase64 },
         ...garagePicsBase64.map((p) => ({ slot: p.slot, label: p.label, file: { name: p.name, type: p.type }, data: p.data })),
       ].filter(Boolean) as { slot: string; label: string; file: { name: string; type: string }; data: string }[];
 
+      const failed: string[] = [];
       for (const u of driveUploads) {
-        const { error: uploadError } = await supabase.functions.invoke("upload-warranty-files", {
-          body: { verificationUid: uid, slot: u.slot, label: u.label, name: u.file.name, type: u.file.type, data: u.data },
-        });
-        if (uploadError) console.error(`Drive upload failed for ${u.slot}:`, uploadError);
+        let uploaded = false;
+        for (let attempt = 1; attempt <= 3 && !uploaded; attempt++) {
+          const { error: uploadError } = await supabase.functions.invoke("upload-warranty-files", {
+            body: { verificationUid: uid, slot: u.slot, label: u.label, name: u.file.name, type: u.file.type, data: u.data },
+          });
+          if (uploadError) console.error(`Drive upload failed for ${u.slot} (attempt ${attempt}):`, uploadError);
+          else uploaded = true;
+        }
+        if (!uploaded) failed.push(u.label);
       }
+      setFailedUploads(failed);
 
       // Log the registration (with the Drive folder link) to the Google Sheet.
       const { error: sheetError } = await supabase.functions.invoke("upload-warranty-files", {
@@ -706,6 +714,13 @@ const RegistrationForm = ({
             <p className="text-sm text-green-600 mt-2">Copied to clipboard!</p>
           )}
         </div>
+
+        {failedUploads.length > 0 && (
+          <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 p-4 text-sm text-amber-800 dark:text-amber-200 text-left">
+            Your registration is saved, but these files could not be uploaded: {failedUploads.join(", ")}.
+            Please contact support with your Verification UID to send them.
+          </div>
+        )}
 
         <p className="text-sm text-text-muted dark:text-d-text-muted mb-6">
           Keep this UID safe. You'll need it to check your warranty status or file a claim.

@@ -49,7 +49,14 @@ const getAccessToken = async (): Promise<string> => {
     }),
   });
   const body = await res.json();
-  if (!res.ok || !body.access_token) throw new Error(`Google auth failed: ${body.error_description ?? body.error}`);
+  if (!res.ok || !body.access_token) {
+    const clientId = Deno.env.get("GOOGLE_CLIENT_ID") ?? "";
+    throw new Error(
+      `Google auth failed: ${body.error} - ${body.error_description} ` +
+        `(client_id ends "${clientId.slice(-30)}", secret length ${(Deno.env.get("GOOGLE_CLIENT_SECRET") ?? "").length}, ` +
+        `token length ${(Deno.env.get("GOOGLE_REFRESH_TOKEN") ?? "").length})`,
+    );
+  }
   return body.access_token;
 };
 

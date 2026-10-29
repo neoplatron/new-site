@@ -14,6 +14,8 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Partners from "./pages/Partners";
 import Locations from "./pages/Locations";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PartnerPopup from "./components/PartnerPopup";
 import ScrollToTop from "./components/ScrollToTop";
@@ -43,6 +45,8 @@ function AppContent() {
 
         <Route path="/partners" element={<Partners />} />
         <Route path="/locations" element={<Locations />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="/partners/dealers" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/distributors" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/franchise" element={<Navigate to="/partners" replace />} />
