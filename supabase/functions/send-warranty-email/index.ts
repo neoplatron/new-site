@@ -1,5 +1,11 @@
-import { PDFDocument, StandardFonts, rgb, degrees, PDFFont } from "npm:pdf-lib@1.17.1";
+import { PDFDocument, StandardFonts, rgb, degrees, PDFFont, PDFPage } from "npm:pdf-lib@1.17.1";
 import { LOGO_PNG_BASE64 } from "./logo.ts";
+import {
+  WARRANTY_TERMS,
+  WARRANTY_TERMS_TITLE,
+  WARRANTY_MANUFACTURER,
+  WARRANTY_PRODUCT,
+} from "../_shared/warrantyTerms.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +29,11 @@ interface WarrantyEmailPayload {
   kmsDriven?: string | null;
   installationDate: string; // ISO date
   invoiceNumber?: string | null;
+  invoiceDate?: string | null; // ISO date
+  kitSerialNumber?: string | null;
+  vehicleModel?: string | null;
+  installProductType?: string | null;
+  termsAcceptedAt?: string | null; // ISO date
   installedBy?: string | null;
   sellerCode?: string | null;
   registrationDate: string; // ISO date
@@ -207,11 +218,13 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     [
       ["Installation Date", formatDate(data.installationDate)],
       ["Invoice Number", data.invoiceNumber || "-"],
+      ["Invoice Date", formatDate(data.invoiceDate || "")],
       ["Installed By", data.installedBy || "-"],
       ["Seller Code", data.sellerCode || "-"],
       ["Garage / Seller Name", data.garageName || "-"],
     ],
-    cursorY
+    cursorY,
+    3
   );
 
   // ---- Product details ----
@@ -219,28 +232,33 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
   const productFields: [string, string][] =
     data.warrantyType === "vehicle"
       ? [
-          ["Warranty Type", "Vehicle Installation"],
+          ["Kit Serial Number", data.kitSerialNumber || "-"],
+          ["Product Type", data.installProductType || "-"],
+          ["Vehicle Model", data.vehicleModel || "-"],
           ["Vehicle Type", data.productType],
           ["Vehicle Number", data.vehicleNumber || "-"],
           ["Fuel Type", data.fuelType || "-"],
           ["Kms Driven at Installation", data.kmsDriven ? `${data.kmsDriven} km` : "-"],
         ]
       : [
-          ["Warranty Type", "Generator Installation"],
+          ["Kit Serial Number", data.kitSerialNumber || "-"],
+          ["Product Type", data.installProductType || "-"],
+          ["Equipment Model", data.vehicleModel || "-"],
           ["Generator Type", data.productType],
         ];
-  cursorY = fieldGrid(productFields, cursorY);
+  cursorY = fieldGrid(productFields, cursorY, 3);
 
   // ---- Warranty validity ----
   cursorY = sectionHeader("WARRANTY VALIDITY", cursorY);
   cursorY = fieldGrid(
     [
-      ["Registration Date", formatDate(data.registrationDate)],
+      ["Commencement Date", formatDate(data.installationDate)],
       ["Expiry Date", formatDate(data.expiryDate)],
-      ["Warranty Period", "1 Year"],
+      ["Warranty Period", "1 Year / 20,000 km*"],
       ["Status", "Active"],
     ],
-    cursorY
+    cursorY,
+    4
   );
 
   // ---- Footer ----
@@ -255,7 +273,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
 
   // Terms
   const terms =
-    "This certificate is proof of Neoplatron warranty registration. Warranty is valid for the period stated above from the date of installation, subject to the Terms & Conditions at neoplatron.in/warranty. Please retain this certificate for future claims.";
+    "This certificate is proof of Neoplatron warranty registration. *Warranty is valid for one year or 20,000 km from the date of installation, whichever is earlier, subject to the Warranty Terms & Conditions on the following pages. Please retain this certificate for future claims.";
   const wrapWidth = CONTENT_W;
   const words = terms.split(" ");
   let line = "";
@@ -275,7 +293,182 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     page.drawText(line, { x: CONTENT_X, y: lineY, size: termsSize, font, color: MUTED });
   }
 
+  appendTermsPages(pdfDoc, data, font, boldFont);
+
   return pdfDoc.save();
+}
+
+function wrapText(font: PDFFont, text: string, size: number, maxWidth: number): string[] {
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(/\s+/)) {
+    const test = line ? `${line} ${word}` : word;
+    if (line && font.widthOfTextAtSize(test, size) > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+// Pages 2+: the registration details from the T&C document filled in with this
+// customer's data, followed by the full Warranty Terms & Conditions.
+function appendTermsPages(pdfDoc: PDFDocument, data: WarrantyEmailPayload, font: PDFFont, boldFont: PDFFont) {
+  const PAGE_W = 595;
+  const PAGE_H = 842;
+  const MARGIN = 30;
+  const X = MARGIN + 18;
+  const W = PAGE_W - 2 * (MARGIN + 18);
+  const TOP = PAGE_H - MARGIN - 50;
+  const BOTTOM = MARGIN + 36;
+  const BODY = 8.5;
+  const LEADING = 11.5;
+
+  let page!: PDFPage;
+  let y = 0;
+
+  const newPage = () => {
+    page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+    page.drawRectangle({
+      x: MARGIN,
+      y: MARGIN,
+      width: PAGE_W - 2 * MARGIN,
+      height: PAGE_H - 2 * MARGIN,
+      borderColor: NAVY,
+      borderWidth: 1.5,
+    });
+    page.drawText("NEOPLATRON INDIA PVT. LTD.", { x: X, y: PAGE_H - MARGIN - 26, size: 8, font: boldFont, color: NAVY });
+    const ref = `Warranty No. ${data.verificationUid}`;
+    page.drawText(ref, {
+      x: X + W - font.widthOfTextAtSize(ref, 8),
+      y: PAGE_H - MARGIN - 26,
+      size: 8,
+      font,
+      color: MUTED,
+    });
+    page.drawLine({
+      start: { x: X, y: PAGE_H - MARGIN - 34 },
+      end: { x: X + W, y: PAGE_H - MARGIN - 34 },
+      thickness: 0.75,
+      color: LINE,
+    });
+    const pageNo = `Page ${pdfDoc.getPageCount()}`;
+    page.drawText("Neoplatron India Pvt. Ltd. | Warranty Terms & Conditions", { x: X, y: MARGIN + 14, size: 7, font, color: MUTED });
+    page.drawText(pageNo, { x: X + W - font.widthOfTextAtSize(pageNo, 7), y: MARGIN + 14, size: 7, font, color: MUTED });
+    y = TOP;
+  };
+
+  const ensure = (h: number) => {
+    if (y - h < BOTTOM) newPage();
+  };
+
+  const paragraph = (text: string, opts: { x?: number; size?: number; bold?: boolean; color?: ReturnType<typeof rgb> } = {}) => {
+    const px = opts.x ?? X;
+    const size = opts.size ?? BODY;
+    const f = opts.bold ? boldFont : font;
+    for (const ln of wrapText(f, text, size, X + W - px)) {
+      ensure(LEADING);
+      page.drawText(ln, { x: px, y, size, font: f, color: opts.color ?? DARK });
+      y -= LEADING;
+    }
+  };
+
+  newPage();
+
+  // ---- Title ----
+  const title = WARRANTY_TERMS_TITLE.toUpperCase();
+  page.drawText(title, { x: X + (W - boldFont.widthOfTextAtSize(title, 13)) / 2, y, size: 13, font: boldFont, color: NAVY });
+  y -= 28;
+
+  // ---- Warranty registration details (filled) ----
+  page.drawText("WARRANTY REGISTRATION DETAILS", { x: X, y, size: 10, font: boldFont, color: NAVY });
+  y -= 8;
+
+  const isVehicle = data.warrantyType === "vehicle";
+  const installer = [data.garageName, data.sellerCode ? `(Seller Code ${data.sellerCode})` : "", data.installedBy ? `- Technician: ${data.installedBy}` : ""]
+    .filter(Boolean)
+    .join(" ");
+  const rows: [string, string][] = [
+    ["Effective Date", formatDate(data.registrationDate)],
+    ["Manufacturer", WARRANTY_MANUFACTURER],
+    ["Product", WARRANTY_PRODUCT],
+    ["Warranty Number", data.verificationUid],
+    ["Customer Name", data.customerName],
+    ["Mobile Number", data.phone || "-"],
+    [isVehicle ? "Vehicle Model" : "Equipment Model", [data.vehicleModel, data.productType].filter(Boolean).join(" - ") || "-"],
+    [isVehicle ? "Vehicle Registration Number" : "Equipment ID", data.vehicleNumber || "-"],
+    ["Kit Serial Number", data.kitSerialNumber || "-"],
+    ["Invoice Number and Date", `${data.invoiceNumber || "-"}  |  ${formatDate(data.invoiceDate || "")}`],
+    ["Installation Date", formatDate(data.installationDate)],
+    ["Authorised Dealer/Installer", installer || "-"],
+    ["Warranty Commencement Date", formatDate(data.installationDate)],
+    ["Warranty Expiry Date", `${formatDate(data.expiryDate)} or 20,000 km, whichever is earlier`],
+  ];
+
+  const LABEL_W = 165;
+  const ROW_PAD = 5;
+  rows.forEach(([label, value], i) => {
+    const valueLines = wrapText(boldFont, value || "-", 9, W - LABEL_W - 16);
+    const rowH = Math.max(1, valueLines.length) * 12 + ROW_PAD * 2;
+    ensure(rowH);
+    const top = y;
+    if (i % 2 === 0) {
+      page.drawRectangle({ x: X, y: top - rowH, width: W, height: rowH, color: NAVY_LIGHT });
+    }
+    page.drawText(label, { x: X + 8, y: top - ROW_PAD - 9, size: 8.5, font, color: MUTED });
+    valueLines.forEach((ln, li) => {
+      page.drawText(ln, { x: X + LABEL_W, y: top - ROW_PAD - 9 - li * 12, size: 9, font: boldFont, color: DARK });
+    });
+    y = top - rowH;
+  });
+  page.drawRectangle({ x: X, y, width: W, height: TOP - 36 - y, borderColor: LINE, borderWidth: 0.75 });
+  y -= 22;
+
+  // ---- Terms & conditions ----
+  for (const section of WARRANTY_TERMS) {
+    ensure(LEADING * 4);
+    y -= 4;
+    page.drawText(section.title, { x: X, y, size: 10, font: boldFont, color: NAVY });
+    y -= LEADING + 3;
+
+    for (const item of section.items) {
+      if (item.subheading) {
+        ensure(LEADING * 2);
+        paragraph(`${item.n} ${item.text}`, { bold: true });
+        continue;
+      }
+      if (item.n) {
+        ensure(LEADING);
+        page.drawText(item.n, { x: X, y, size: BODY, font: boldFont, color: DARK });
+        paragraph(item.text, { x: X + 34 });
+      } else {
+        paragraph(item.text, { x: X + 34 });
+      }
+      for (const b of item.bullets ?? []) {
+        const lines = wrapText(font, b, BODY, W - 52);
+        lines.forEach((ln, li) => {
+          ensure(LEADING);
+          if (li === 0) page.drawText("•", { x: X + 40, y, size: BODY, font, color: DARK });
+          page.drawText(ln, { x: X + 50, y, size: BODY, font, color: DARK });
+          y -= LEADING;
+        });
+      }
+      y -= 3;
+    }
+  }
+
+  // ---- Acknowledgement line ----
+  ensure(LEADING * 4);
+  y -= 8;
+  page.drawLine({ start: { x: X, y: y + 6 }, end: { x: X + W, y: y + 6 }, thickness: 0.75, color: LINE, dashArray: [3, 3] });
+  y -= 6;
+  const accepted = data.termsAcceptedAt
+    ? `Accepted electronically by ${data.customerName} at the time of warranty registration on ${formatDate(data.termsAcceptedAt)}. `
+    : "";
+  paragraph(`${accepted}This document is system generated and does not require a signature.`, { size: 7.5, color: MUTED });
 }
 
 Deno.serve(async (req: Request) => {

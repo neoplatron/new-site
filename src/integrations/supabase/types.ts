@@ -92,6 +92,9 @@ export type Database = {
           customer_address: string
           customer_name: string
           email: string
+          drive_folder_id: string | null
+          drive_folder_url: string | null
+          sheet_logged_at: string | null
           fuel_type: string | null
           garage_name: string | null
           id: string

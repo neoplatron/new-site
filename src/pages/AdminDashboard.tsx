@@ -756,8 +756,14 @@ export default function AdminDashboard() {
                                     {selectedWarranty.invoice_data && (
                                         <div className="border border-border dark:border-d-border rounded-lg p-4">
                                             <h5 className="font-bold text-sm mb-2 text-text dark:text-d-text">Invoice Document</h5>
-                                            <a download={`invoice_${selectedWarranty.invoice_number}.pdf`} href={selectedWarranty.invoice_data} className="text-primary hover:underline text-sm flex items-center gap-2">
-                                                <FileText className="w-4 h-4" /> Download Invoice
+                                            <a
+                                                {...(selectedWarranty.invoice_data.startsWith('http')
+                                                    ? { target: "_blank", rel: "noopener noreferrer" }
+                                                    : { download: `invoice_${selectedWarranty.invoice_number}.pdf` })}
+                                                href={selectedWarranty.invoice_data}
+                                                className="text-primary hover:underline text-sm flex items-center gap-2"
+                                            >
+                                                <FileText className="w-4 h-4" /> {selectedWarranty.invoice_data.startsWith('http') ? "Open Invoice in Drive" : "Download Invoice"}
                                             </a>
                                             {/* Preview if image */}
                                             {selectedWarranty.invoice_data.startsWith('data:image') && (
@@ -768,16 +774,31 @@ export default function AdminDashboard() {
                                         </div>
                                     )}
 
+                                    {selectedWarranty.drive_folder_url && (
+                                        <a href={selectedWarranty.drive_folder_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm flex items-center gap-2">
+                                            <FileText className="w-4 h-4" /> Open Google Drive folder
+                                        </a>
+                                    )}
+
                                     {/* Installation Photos */}
                                     {selectedWarranty.installation_photos && (
                                         <div className="border border-border dark:border-d-border rounded-lg p-4">
                                             <h5 className="font-bold text-sm mb-2 text-text dark:text-d-text">Installation Photos</h5>
                                             <div className="flex flex-wrap gap-2">
                                                 {Array.isArray(selectedWarranty.installation_photos) && selectedWarranty.installation_photos.map((photo: any, idx: number) => (
-                                                    <div key={idx} className="relative group">
-                                                        <a href={photo.data} download={photo.name || `photo_${idx}.jpg`} className="block w-24 h-24 rounded-lg overflow-hidden border border-border dark:border-d-border hover:border-primary transition-colors bg-gray-50 dark:bg-gray-800">
-                                                            <img src={photo.data} alt={`Installation ${idx + 1}`} className="w-full h-full object-cover" />
-                                                        </a>
+                                                    <div key={idx} className="relative group w-24">
+                                                        {photo.url ? (
+                                                            <a href={photo.url} target="_blank" rel="noopener noreferrer" className="w-24 h-24 rounded-lg border border-border dark:border-d-border hover:border-primary transition-colors bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xs text-primary text-center p-1">
+                                                                Open in Drive
+                                                            </a>
+                                                        ) : (
+                                                            <a href={photo.data} download={photo.name || `photo_${idx}.jpg`} className="block w-24 h-24 rounded-lg overflow-hidden border border-border dark:border-d-border hover:border-primary transition-colors bg-gray-50 dark:bg-gray-800">
+                                                                <img src={photo.data} alt={photo.label || `Installation ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            </a>
+                                                        )}
+                                                        {photo.label && (
+                                                            <p className="mt-1 text-xs text-text-muted dark:text-d-text-muted truncate" title={photo.label}>{photo.label}</p>
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>

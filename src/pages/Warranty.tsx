@@ -1,11 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   Shield,
   CheckCircle,
   User,
   Car,
   Wrench,
-  Camera,
   FileText,
   Send,
   AlertCircle,
@@ -26,22 +25,26 @@ import {
 } from "lucide-react";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "../integrations/supabase/client";
 import { validateSellerCode, searchWarranty } from "../api/warrantyAPI";
-import SimpleCaptcha from "../components/SimpleCaptcha";
+import WarrantyTermsAcceptance from "../components/WarrantyTermsAcceptance";
 import SEO from "../components/SEO";
+import InstallationPhotoSlots, {
+  MAX_EXTRA_PHOTOS,
+  PHOTO_SLOTS,
+  emptyPhotoSlots,
+  type PhotoSlotKey,
+  type PhotoSlots,
+  type SlotPhoto,
+} from "../components/InstallationPhotoSlots";
 
 // ==================== TYPES ====================
 type WarrantyMode = "vehicle" | "generator";
 type WarrantyAction = "register" | "check" | null;
 type SubmitStatus = null | "success" | "error";
 
-interface GaragePic {
-  file: File;
-  previewUrl: string;
-}
-
 interface FilesState {
   invoice: File | null;
-  garagePics: GaragePic[];
+  garagePics: PhotoSlots;
+  extraPics: SlotPhoto[];
   vehicleRC: File | null;
 }
 
@@ -59,6 +62,11 @@ interface WarrantyData {
   registration_date: string;
   installation_date: string;
   invoice_number?: string;
+  invoice_date?: string;
+  kit_serial_number?: string;
+  vehicle_model?: string;
+  install_product_type?: string;
+  terms_accepted_at?: string;
   installed_by?: string;
   seller_code_used?: string;
   garage_name?: string;
@@ -285,6 +293,9 @@ const RegistrationForm = ({
     phone: "",
     installationDate: "",
     invoiceNumber: "",
+    invoiceDate: "",
+    kitSerialNumber: "",
+    vehicleModel: "",
     installedBy: "",
     // garageName is now optional or used for non-seller installs if we allowed them, 
     // but requirements say "Seller Code" is key. We'll keep garageName as "Seller Name" (read only) or manual override?
@@ -297,6 +308,7 @@ const RegistrationForm = ({
     pinCode: "",
     vehicleNumber: "",
     productType: "",
+    installProductType: "",
     fuelType: "",
     kmsDriven: "",
   });
@@ -306,7 +318,8 @@ const RegistrationForm = ({
 
   const [files, setFiles] = useState<FilesState>({
     invoice: null,
-    garagePics: [],
+    garagePics: emptyPhotoSlots(),
+    extraPics: [],
     vehicleRC: null,
   });
 
@@ -316,11 +329,7 @@ const RegistrationForm = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedUID, setGeneratedUID] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-
-  const handleCaptchaVerify = useCallback((isValid: boolean) => {
-    setCaptchaVerified(isValid);
-  }, []);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -344,40 +353,66 @@ const RegistrationForm = ({
     setFiles((prev) => ({ ...prev, [fieldName]: file }));
   };
 
-  const handleMultipleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = Array.from(e.target.files ?? []);
-    if (picked.length === 0) return;
+  const handleSlotPhotoChange = (slot: PhotoSlotKey, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.currentTarget.value = "";
+    if (!file) return;
 
-    for (const file of picked) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMessage("Each file size should not exceed 5MB");
-        return;
-      }
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage("Please upload an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Each photo should not exceed 5MB");
+      return;
     }
 
-    const newPics: GaragePic[] = picked.map((f) => ({
-      file: f,
-      previewUrl: URL.createObjectURL(f),
-    }));
-
+    setErrorMessage("");
     setFiles((prev) => {
-      const combined = [...prev.garagePics, ...newPics].slice(0, 5);
-      return { ...prev, garagePics: combined };
-    });
-
-    e.currentTarget.value = "";
-  };
-
-  const removeGaragePic = (index: number) => {
-    setFiles((prev) => {
-      const toRemove = prev.garagePics[index];
-      if (toRemove?.previewUrl) {
-        URL.revokeObjectURL(toRemove.previewUrl);
-      }
+      const old = prev.garagePics[slot];
+      if (old) URL.revokeObjectURL(old.previewUrl);
       return {
         ...prev,
-        garagePics: prev.garagePics.filter((_, i) => i !== index),
+        garagePics: { ...prev.garagePics, [slot]: { file, previewUrl: URL.createObjectURL(file) } },
       };
+    });
+  };
+
+  const handleExtraPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    e.currentTarget.value = "";
+    if (picked.length === 0) return;
+
+    if (picked.some((f) => !f.type.startsWith("image/"))) {
+      setErrorMessage("Please upload image files only");
+      return;
+    }
+    if (picked.some((f) => f.size > 5 * 1024 * 1024)) {
+      setErrorMessage("Each photo should not exceed 5MB");
+      return;
+    }
+
+    setErrorMessage("");
+    const newPics: SlotPhoto[] = picked.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
+    setFiles((prev) => ({
+      ...prev,
+      extraPics: [...prev.extraPics, ...newPics].slice(0, MAX_EXTRA_PHOTOS),
+    }));
+  };
+
+  const removeExtraPic = (index: number) => {
+    setFiles((prev) => {
+      const toRemove = prev.extraPics[index];
+      if (toRemove) URL.revokeObjectURL(toRemove.previewUrl);
+      return { ...prev, extraPics: prev.extraPics.filter((_, i) => i !== index) };
+    });
+  };
+
+  const removeGaragePic = (slot: PhotoSlotKey) => {
+    setFiles((prev) => {
+      const toRemove = prev.garagePics[slot];
+      if (toRemove) URL.revokeObjectURL(toRemove.previewUrl);
+      return { ...prev, garagePics: { ...prev.garagePics, [slot]: null } };
     });
   };
 
@@ -427,13 +462,19 @@ const RegistrationForm = ({
       if (selectedDate < tenDaysAgo) return { isValid: false, message: "Installation Date cannot be older than 10 days" };
 
       if (!formData.invoiceNumber.trim()) return { isValid: false, message: "Invoice Number is required" };
+      if (!formData.invoiceDate) return { isValid: false, message: "Invoice Date is required" };
+      if (new Date(formData.invoiceDate) > new Date()) return { isValid: false, message: "Invoice Date cannot be in the future" };
       if (!formData.installedBy.trim()) return { isValid: false, message: "Installed By is required" };
+      if (!formData.installProductType) return { isValid: false, message: "Product Type is required" };
+      if (!formData.kitSerialNumber.trim()) return { isValid: false, message: "Kit Serial Number is required" };
 
       if (!files.invoice) return { isValid: false, message: "Please upload the invoice document" };
-      if (files.garagePics.length === 0) return { isValid: false, message: "Please upload at least one installation photo" };
+      const missingPhoto = PHOTO_SLOTS.find((s) => !files.garagePics[s.key]);
+      if (missingPhoto) return { isValid: false, message: `Please upload the "${missingPhoto.label[mode]}" photo` };
     }
 
     if (step === 4) {
+      if (!formData.vehicleModel.trim()) return { isValid: false, message: `${mode === "vehicle" ? "Vehicle" : "Generator"} Model is required` };
       if (!formData.productType) return { isValid: false, message: `${mode === "vehicle" ? "Vehicle" : "Generator"} Type is required` };
       if (mode === "vehicle") {
         if (!formData.vehicleNumber.trim()) return { isValid: false, message: "Vehicle Number is required" };
@@ -479,9 +520,8 @@ const RegistrationForm = ({
       }
     }
 
-    // Check captcha
-    if (!captchaVerified) {
-      setErrorMessage("Please complete the security check");
+    if (!termsAccepted) {
+      setErrorMessage("Please accept the Warranty Terms & Conditions");
       setSubmitStatus("error");
       setTimeout(() => {
         setSubmitStatus(null);
@@ -495,16 +535,29 @@ const RegistrationForm = ({
 
     try {
       const uid = generateUID();
+      const registeredAt = new Date().toISOString();
 
       const invoiceBase64 = files.invoice ? await fileToBase64(files.invoice) : null;
       const vehicleRCBase64 = files.vehicleRC ? await fileToBase64(files.vehicleRC) : null;
-      const garagePicsBase64 = await Promise.all(
-        files.garagePics.map(async (pic) => ({
+      const garagePicsBase64 = await Promise.all([
+        ...PHOTO_SLOTS.map(async (s) => {
+          const pic = files.garagePics[s.key]!;
+          return {
+            data: await fileToBase64(pic.file),
+            name: pic.file.name,
+            type: pic.file.type,
+            slot: s.key,
+            label: s.label[mode],
+          };
+        }),
+        ...files.extraPics.map(async (pic, i) => ({
           data: await fileToBase64(pic.file),
           name: pic.file.name,
           type: pic.file.type,
-        }))
-      );
+          slot: `extra${i + 1}`,
+          label: `Additional Photo ${i + 1}`,
+        })),
+      ]);
 
       const { error } = await supabase.from("warranty_registrations").insert({
         verification_uid: uid,
@@ -518,7 +571,11 @@ const RegistrationForm = ({
         pin_code: formData.pinCode,
         installation_date: formData.installationDate,
         invoice_number: formData.invoiceNumber,
+        invoice_date: formData.invoiceDate,
+        kit_serial_number: formData.kitSerialNumber.trim().toUpperCase(),
+        vehicle_model: formData.vehicleModel.trim(),
         installed_by: formData.installedBy,
+        terms_accepted_at: registeredAt,
 
         // Seller Fields
         seller_id: sellerId,
@@ -527,6 +584,7 @@ const RegistrationForm = ({
 
         vehicle_number: mode === "vehicle" ? formData.vehicleNumber.toUpperCase() : null,
         product_type: formData.productType,
+        install_product_type: formData.installProductType,
         fuel_type: mode === "vehicle" ? formData.fuelType : null,
         kms_driven: mode === "vehicle" && formData.kmsDriven ? parseInt(formData.kmsDriven) : null,
         invoice_data: invoiceBase64,
@@ -535,6 +593,27 @@ const RegistrationForm = ({
       });
 
       if (error) throw error;
+
+      // Move the files to Google Drive (one request per file). The base64 copy saved above is
+      // the fallback, so a Drive failure never fails the registration.
+      const driveUploads = [
+        invoiceBase64 && files.invoice && { slot: "invoice", label: `Invoice ${formData.invoiceNumber}`, file: files.invoice, data: invoiceBase64 },
+        vehicleRCBase64 && files.vehicleRC && { slot: "rc", label: "Vehicle RC", file: files.vehicleRC, data: vehicleRCBase64 },
+        ...garagePicsBase64.map((p) => ({ slot: p.slot, label: p.label, file: { name: p.name, type: p.type }, data: p.data })),
+      ].filter(Boolean) as { slot: string; label: string; file: { name: string; type: string }; data: string }[];
+
+      for (const u of driveUploads) {
+        const { error: uploadError } = await supabase.functions.invoke("upload-warranty-files", {
+          body: { verificationUid: uid, slot: u.slot, label: u.label, name: u.file.name, type: u.file.type, data: u.data },
+        });
+        if (uploadError) console.error(`Drive upload failed for ${u.slot}:`, uploadError);
+      }
+
+      // Log the registration (with the Drive folder link) to the Google Sheet.
+      const { error: sheetError } = await supabase.functions.invoke("upload-warranty-files", {
+        body: { action: "finalize", verificationUid: uid },
+      });
+      if (sheetError) console.error("Sheet logging failed:", sheetError);
 
       const expiryDate = new Date(formData.installationDate);
       expiryDate.setFullYear(expiryDate.getFullYear() + WARRANTY_PERIOD_YEARS);
@@ -557,9 +636,14 @@ const RegistrationForm = ({
             kmsDriven: mode === "vehicle" ? formData.kmsDriven : null,
             installationDate: formData.installationDate,
             invoiceNumber: formData.invoiceNumber,
+            invoiceDate: formData.invoiceDate,
+            kitSerialNumber: formData.kitSerialNumber.trim().toUpperCase(),
+            vehicleModel: formData.vehicleModel.trim(),
+            installProductType: formData.installProductType,
+            termsAcceptedAt: registeredAt,
             installedBy: formData.installedBy,
             sellerCode: formData.sellerCode,
-            registrationDate: new Date().toISOString(),
+            registrationDate: registeredAt,
             expiryDate: expiryDate.toISOString(),
             garageName: formData.garageName,
           },
@@ -822,7 +906,34 @@ const RegistrationForm = ({
                 <p className="text-xs text-text-muted mt-1">Must be within the last 10 days</p>
               </div>
               <InputField label="Invoice Number" name="invoiceNumber" value={formData.invoiceNumber} onChange={handleChange} required />
+              <InputField label="Invoice Date" name="invoiceDate" type="date" value={formData.invoiceDate} onChange={handleChange} required />
               <InputField label="Installed By (Technician)" name="installedBy" value={formData.installedBy} onChange={handleChange} required />
+              <SelectField
+                label="Product Type"
+                name="installProductType"
+                value={formData.installProductType}
+                onChange={handleChange}
+                options={[
+                  { value: "", label: "Select Product Type" },
+                  { value: "2/3 Wheeler", label: "2/3 Wheeler" },
+                  { value: "4Wheeler 1.8 (Below 1800cc)", label: "4Wheeler 1.8 (Below 1800cc)" },
+                  { value: "4Wheeler 3.0 (above 1800cc)", label: "4Wheeler 3.0 (above 1800cc)" },
+                  { value: "6 wheeler", label: "6 wheeler" },
+                  { value: "Truck/Bus", label: "Truck/Bus" },
+                  { value: "Diesel Generator", label: "Diesel Generator" },
+                ]}
+                required
+              />
+              <div>
+                <InputField
+                  label="Kit Serial Number"
+                  name="kitSerialNumber"
+                  value={formData.kitSerialNumber}
+                  onChange={handleChange}
+                  required
+                />
+                <p className="text-xs text-text-muted mt-1">As printed on the kit label, e.g. SV5G-GI-19</p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -834,37 +945,15 @@ const RegistrationForm = ({
                 required
               />
 
-              <div>
-                <label className="block text-sm font-medium text-text dark:text-d-text mb-2">
-                  Installation Photos (Max 5) *
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  {files.garagePics.map((pic, index) => (
-                    <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
-                      <img src={pic.previewUrl} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeGaragePic(index)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                  {files.garagePics.length < 5 && (
-                    <label className="w-20 h-20 border-2 border-dashed border-border dark:border-d-border rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
-                      <Camera className="w-6 h-6 text-text-muted" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleMultipleFileChange}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
-                </div>
-              </div>
+              <InstallationPhotoSlots
+                mode={mode}
+                photos={files.garagePics}
+                onSelect={handleSlotPhotoChange}
+                onRemove={removeGaragePic}
+                extras={files.extraPics}
+                onAddExtras={handleExtraPhotos}
+                onRemoveExtra={removeExtraPic}
+              />
             </div>
           </div>
         )}
@@ -880,6 +969,7 @@ const RegistrationForm = ({
               <>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <InputField label="Vehicle Number" name="vehicleNumber" value={formData.vehicleNumber} onChange={handleChange} required />
+                  <InputField label="Vehicle Make & Model" name="vehicleModel" value={formData.vehicleModel} onChange={handleChange} required />
                   <SelectField
                     label="Vehicle Type"
                     name="productType"
@@ -919,25 +1009,27 @@ const RegistrationForm = ({
                 />
               </>
             ) : (
-              <SelectField
-                label="Generator Type"
-                name="productType"
-                value={formData.productType}
-                onChange={handleChange}
-                options={[
-                  { value: "", label: "Select Generator Type" },
-                  { value: "Portable", label: "Portable Generator" },
-                  { value: "Standby", label: "Standby Generator" },
-                  { value: "Industrial", label: "Industrial Generator" },
-                  { value: "Inverter", label: "Inverter Generator" },
-                ]}
-                required
-              />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <InputField label="Generator Make & Model" name="vehicleModel" value={formData.vehicleModel} onChange={handleChange} required />
+                <SelectField
+                  label="Generator Type"
+                  name="productType"
+                  value={formData.productType}
+                  onChange={handleChange}
+                  options={[
+                    { value: "", label: "Select Generator Type" },
+                    { value: "Portable", label: "Portable Generator" },
+                    { value: "Standby", label: "Standby Generator" },
+                    { value: "Industrial", label: "Industrial Generator" },
+                    { value: "Inverter", label: "Inverter Generator" },
+                  ]}
+                  required
+                />
+              </div>
             )}
 
-            {/* Simple Captcha */}
             <div className="mt-6 pt-6 border-t border-border dark:border-d-border">
-              <SimpleCaptcha onVerify={handleCaptchaVerify} />
+              <WarrantyTermsAcceptance accepted={termsAccepted} onChange={setTermsAccepted} />
             </div>
           </div>
         )}
@@ -1032,6 +1124,11 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
           kmsDriven: warrantyData.kms_driven,
           installationDate: warrantyData.installation_date,
           invoiceNumber: warrantyData.invoice_number,
+          invoiceDate: warrantyData.invoice_date,
+          kitSerialNumber: warrantyData.kit_serial_number,
+          vehicleModel: warrantyData.vehicle_model,
+          installProductType: warrantyData.install_product_type,
+          termsAcceptedAt: warrantyData.terms_accepted_at,
           installedBy: warrantyData.installed_by,
           sellerCode: warrantyData.seller_code_used,
           registrationDate: warrantyData.registration_date,
@@ -1248,6 +1345,7 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
             <div className="grid sm:grid-cols-2 gap-4">
               <InfoItem icon={Calendar} label="Installation Date" value={formatDisplayDate(warrantyData.installation_date)} />
               <InfoItem icon={FileText} label="Invoice Number" value={warrantyData.invoice_number || "-"} />
+              <InfoItem icon={Calendar} label="Invoice Date" value={formatDisplayDate(warrantyData.invoice_date)} />
               <InfoItem icon={Wrench} label="Installed By" value={warrantyData.installed_by || "-"} />
               <InfoItem icon={Store} label="Seller Code" value={warrantyData.seller_code_used || "-"} />
               <InfoItem icon={Store} label="Garage / Seller Name" value={warrantyData.garage_name || "-"} />
@@ -1260,7 +1358,10 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
               Product Details
             </h4>
             <div className="grid sm:grid-cols-2 gap-4">
-              <InfoItem icon={mode === "vehicle" ? Car : Wrench} label="Product Type" value={warrantyData.product_type} />
+              <InfoItem icon={ShieldCheck} label="Kit Serial Number" value={warrantyData.kit_serial_number || "-"} />
+              <InfoItem icon={Wrench} label="Product Type" value={warrantyData.install_product_type || "-"} />
+              <InfoItem icon={mode === "vehicle" ? Car : Wrench} label={mode === "vehicle" ? "Vehicle Model" : "Generator Model"} value={warrantyData.vehicle_model || "-"} />
+              <InfoItem icon={mode === "vehicle" ? Car : Wrench} label={mode === "vehicle" ? "Vehicle Type" : "Generator Type"} value={warrantyData.product_type} />
               {mode === "vehicle" && (
                 <>
                   <InfoItem icon={Car} label="Vehicle Number" value={warrantyData.vehicle_number || "-"} />
