@@ -324,11 +324,15 @@ const RegistrationForm = ({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitProgress, setSubmitProgress] = useState("");
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedUID, setGeneratedUID] = useState<string | null>(null);
   const [failedUploads, setFailedUploads] = useState<string[]>([]);
+  const [cardPayload, setCardPayload] = useState<Record<string, unknown> | null>(null);
+  const [isDownloadingCard, setIsDownloadingCard] = useState(false);
+  const [cardDownloadError, setCardDownloadError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -417,13 +421,32 @@ const RegistrationForm = ({
     });
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
+  const readAsDataURL = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
+  };
+
+  // Phone photos are several MB each; shrinking them keeps the upload (the slow part of submitting) short.
+  const fileToBase64 = async (file: File): Promise<string> => {
+    const MAX_DIMENSION = 1800;
+    if (!file.type.startsWith("image/") || file.size < 400 * 1024) return readAsDataURL(file);
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.8));
+      return blob && blob.size < file.size ? readAsDataURL(blob) : readAsDataURL(file);
+    } catch {
+      return readAsDataURL(file);
+    }
   };
 
   const validateStep = (step: number): { isValid: boolean; message: string } => {
@@ -537,6 +560,7 @@ const RegistrationForm = ({
     try {
       const uid = generateUID();
       const registeredAt = new Date().toISOString();
+      setSubmitProgress("Preparing files...");
 
       const invoiceBase64 = files.invoice ? await fileToBase64(files.invoice) : null;
       const vehicleRCBase64 = files.vehicleRC ? await fileToBase64(files.vehicleRC) : null;
@@ -604,11 +628,12 @@ const RegistrationForm = ({
       ].filter(Boolean) as { slot: string; label: string; file: { name: string; type: string }; data: string }[];
 
       const failed: string[] = [];
-      for (const u of driveUploads) {
+      for (const [i, u] of driveUploads.entries()) {
+        setSubmitProgress(`Uploading file ${i + 1} of ${driveUploads.length}...`);
         let uploaded = false;
         for (let attempt = 1; attempt <= 3 && !uploaded; attempt++) {
           const { error: uploadError } = await supabase.functions.invoke("upload-warranty-files", {
-            body: { verificationUid: uid, slot: u.slot, label: u.label, name: u.file.name, type: u.file.type, data: u.data },
+            body: { verificationUid: uid, slot: u.slot, label: u.label, name: u.data.startsWith("data:image/jpeg") ? u.file.name.replace(/.[^.]+$/, "") + ".jpg" : u.file.name, type: u.data.slice(5, u.data.indexOf(";")), data: u.data },
           });
           if (uploadError) console.error(`Drive upload failed for ${u.slot} (attempt ${attempt}):`, uploadError);
           else uploaded = true;
@@ -616,6 +641,7 @@ const RegistrationForm = ({
         if (!uploaded) failed.push(u.label);
       }
       setFailedUploads(failed);
+      setSubmitProgress("Finishing up...");
 
       // Log the registration (with the Drive folder link) to the Google Sheet.
       const { error: sheetError } = await supabase.functions.invoke("upload-warranty-files", {
@@ -626,36 +652,37 @@ const RegistrationForm = ({
       const expiryDate = new Date(formData.installationDate);
       expiryDate.setFullYear(expiryDate.getFullYear() + WARRANTY_PERIOD_YEARS);
 
+      const payload = {
+        email: formData.email,
+        customerName: formData.customerName,
+        phone: formData.phone,
+        customerAddress: formData.customerAddress,
+        city: formData.city,
+        state: formData.state,
+        pinCode: formData.pinCode,
+        verificationUid: uid,
+        warrantyType: mode,
+        productType: formData.productType,
+        vehicleNumber: mode === "vehicle" ? formData.vehicleNumber.toUpperCase() : null,
+        fuelType: mode === "vehicle" ? formData.fuelType : null,
+        kmsDriven: mode === "vehicle" ? formData.kmsDriven : null,
+        installationDate: formData.installationDate,
+        invoiceNumber: formData.invoiceNumber,
+        invoiceDate: formData.invoiceDate,
+        kitSerialNumber: formData.kitSerialNumber.trim().toUpperCase(),
+        vehicleModel: formData.vehicleModel.trim(),
+        installProductType: formData.installProductType,
+        termsAcceptedAt: registeredAt,
+        installedBy: formData.installedBy,
+        sellerCode: formData.sellerCode,
+        registrationDate: registeredAt,
+        expiryDate: expiryDate.toISOString(),
+        garageName: formData.garageName,
+      };
+      setCardPayload(payload);
+
       supabase.functions
-        .invoke("send-warranty-email", {
-          body: {
-            email: formData.email,
-            customerName: formData.customerName,
-            phone: formData.phone,
-            customerAddress: formData.customerAddress,
-            city: formData.city,
-            state: formData.state,
-            pinCode: formData.pinCode,
-            verificationUid: uid,
-            warrantyType: mode,
-            productType: formData.productType,
-            vehicleNumber: mode === "vehicle" ? formData.vehicleNumber.toUpperCase() : null,
-            fuelType: mode === "vehicle" ? formData.fuelType : null,
-            kmsDriven: mode === "vehicle" ? formData.kmsDriven : null,
-            installationDate: formData.installationDate,
-            invoiceNumber: formData.invoiceNumber,
-            invoiceDate: formData.invoiceDate,
-            kitSerialNumber: formData.kitSerialNumber.trim().toUpperCase(),
-            vehicleModel: formData.vehicleModel.trim(),
-            installProductType: formData.installProductType,
-            termsAcceptedAt: registeredAt,
-            installedBy: formData.installedBy,
-            sellerCode: formData.sellerCode,
-            registrationDate: registeredAt,
-            expiryDate: expiryDate.toISOString(),
-            garageName: formData.garageName,
-          },
-        })
+        .invoke("send-warranty-email", { body: payload })
         .catch((emailError) => {
           console.error("Failed to send warranty email:", emailError);
         });
@@ -672,6 +699,7 @@ const RegistrationForm = ({
       }, 5000);
     } finally {
       setIsSubmitting(false);
+      setSubmitProgress("");
     }
   };
 
@@ -680,6 +708,36 @@ const RegistrationForm = ({
       navigator.clipboard.writeText(generatedUID);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const downloadCard = async () => {
+    if (!cardPayload || !generatedUID) return;
+    setIsDownloadingCard(true);
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-warranty-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ ...cardPayload, action: "download" }),
+      });
+      if (!response.ok) throw new Error("Failed to generate warranty card");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `warranty-card-${generatedUID}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading warranty card:", err);
+      setCardDownloadError(true);
+    } finally {
+      setIsDownloadingCard(false);
     }
   };
 
@@ -726,12 +784,31 @@ const RegistrationForm = ({
           Keep this UID safe. You'll need it to check your warranty status or file a claim.
         </p>
 
-        <button
-          onClick={onReset}
-          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          Done
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={downloadCard}
+            disabled={isDownloadingCard || !cardPayload}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
+          >
+            {isDownloadingCard ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Download className="w-5 h-5" />
+            )}
+            Download Warranty Card
+          </button>
+          <button
+            onClick={onReset}
+            className="px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            Done
+          </button>
+        </div>
+        {cardDownloadError && (
+          <p className="text-sm text-red-600 mt-3">
+            Could not generate the card right now. It has also been emailed to you.
+          </p>
+        )}
       </div>
     );
   }
@@ -1081,7 +1158,7 @@ const RegistrationForm = ({
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
+                  {submitProgress || "Submitting..."}
                 </>
               ) : (
                 <>

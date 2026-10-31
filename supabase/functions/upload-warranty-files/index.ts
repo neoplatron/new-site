@@ -37,7 +37,11 @@ const extFor = (type: string, name: string) => {
   return type === "application/pdf" ? "pdf" : (type.split("/")[1] ?? "bin");
 };
 
+// Reused across requests while the function instance stays warm (tokens last ~1 hour).
+let cachedToken: { value: string; expiresAt: number } | null = null;
+
 const getAccessToken = async (): Promise<string> => {
+  if (cachedToken && Date.now() < cachedToken.expiresAt) return cachedToken.value;
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -57,6 +61,7 @@ const getAccessToken = async (): Promise<string> => {
         `token length ${(Deno.env.get("GOOGLE_REFRESH_TOKEN") ?? "").length})`,
     );
   }
+  cachedToken = { value: body.access_token, expiresAt: Date.now() + ((body.expires_in ?? 3600) - 300) * 1000 };
   return body.access_token;
 };
 
