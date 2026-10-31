@@ -46,6 +46,8 @@ const NAVY_LIGHT = rgb(0.92, 0.95, 0.98);
 const DARK = rgb(0.13, 0.13, 0.15);
 const MUTED = rgb(0.45, 0.47, 0.5);
 const LINE = rgb(0.85, 0.86, 0.88);
+const GOLD = rgb(0.78, 0.6, 0.2);
+const GREEN = rgb(0.09, 0.55, 0.3);
 
 function formatDate(iso: string): string {
   if (!iso) return "-";
@@ -98,7 +100,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     });
   }
 
-  // ---- Outer double border frame ----
+  // ---- Outer frame: navy outline with a fine gold inner line ----
   page.drawRectangle({
     x: MARGIN,
     y: MARGIN,
@@ -107,79 +109,102 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     borderColor: NAVY,
     borderWidth: 1.5,
   });
-  // ---- Header: site logo + title on one line ----
+  page.drawRectangle({
+    x: MARGIN + 4,
+    y: MARGIN + 4,
+    width: PAGE_W - 2 * MARGIN - 8,
+    height: PAGE_H - 2 * MARGIN - 8,
+    borderColor: GOLD,
+    borderWidth: 0.6,
+  });
+
+  // ---- Header band: navy with the logo on a white plate and a gold edge ----
+  const BAND_H = 78;
+  const bandTop = PAGE_H - MARGIN;
+  const bandY = bandTop - BAND_H;
+  page.drawRectangle({ x: MARGIN, y: bandY, width: PAGE_W - 2 * MARGIN, height: BAND_H, color: NAVY });
+  page.drawRectangle({ x: MARGIN, y: bandY - 3, width: PAGE_W - 2 * MARGIN, height: 3, color: GOLD });
+
   const logoImage = await pdfDoc.embedPng(LOGO_PNG_BASE64);
   const logoDisplayHeight = 36;
   const logoDisplayWidth = (logoImage.width / logoImage.height) * logoDisplayHeight;
-  const headerY = PAGE_H - MARGIN - 20 - logoDisplayHeight;
-
-  const title = "CERTIFICATE OF WARRANTY";
-  const titleSize = 17;
-  const titleWidth = boldFont.widthOfTextAtSize(title, titleSize);
-  const headerRowWidth = logoDisplayWidth + 16 + titleWidth;
-  const headerRowX = (PAGE_W - headerRowWidth) / 2;
-
+  const plateX = MARGIN + 16;
+  const plateH = 54;
+  const plateW = logoDisplayWidth + 24;
+  const plateY = bandY + (BAND_H - plateH) / 2;
+  page.drawRectangle({ x: plateX, y: plateY, width: plateW, height: plateH, color: rgb(1, 1, 1) });
   page.drawImage(logoImage, {
-    x: headerRowX,
-    y: headerY,
+    x: plateX + 12,
+    y: plateY + (plateH - logoDisplayHeight) / 2,
     width: logoDisplayWidth,
     height: logoDisplayHeight,
   });
-  page.drawText(title, {
-    x: headerRowX + logoDisplayWidth + 16,
-    y: headerY + (logoDisplayHeight - titleSize) / 2 + 3,
-    size: titleSize,
+
+  const titleX = plateX + plateW + 22;
+  page.drawText("CERTIFICATE OF WARRANTY", {
+    x: titleX,
+    y: bandY + BAND_H / 2 + 2,
+    size: 19,
     font: boldFont,
-    color: NAVY,
+    color: rgb(1, 1, 1),
+  });
+  page.drawText("NEOPLATRON INDIA PVT LTD", {
+    x: titleX,
+    y: bandY + BAND_H / 2 - 16,
+    size: 9,
+    font: boldFont,
+    color: rgb(0.93, 0.8, 0.45),
   });
 
-  const bannerY = headerY - 16;
-  page.drawLine({
-    start: { x: CONTENT_X, y: bannerY },
-    end: { x: CONTENT_X + CONTENT_W, y: bannerY },
-    thickness: 1,
-    color: LINE,
-  });
-
-  // ---- Warranty UID badge ----
-  const badgeY = bannerY - 46;
-  const badgeH = 42;
+  // ---- Warranty UID card: gold accent bar, UID, registration date and status ----
+  const badgeH = 50;
+  const badgeY = bandY - 3 - 16 - badgeH;
   page.drawRectangle({
     x: CONTENT_X,
     y: badgeY,
     width: CONTENT_W,
     height: badgeH,
     color: NAVY_LIGHT,
-    borderColor: NAVY,
-    borderWidth: 1,
+    borderColor: rgb(0.78, 0.84, 0.92),
+    borderWidth: 0.75,
   });
-  page.drawText("WARRANTY UID", {
-    x: CONTENT_X + 14,
-    y: badgeY + badgeH - 16,
-    size: 8,
+  page.drawRectangle({ x: CONTENT_X, y: badgeY, width: 5, height: badgeH, color: GOLD });
+  page.drawText("WARRANTY UID", { x: CONTENT_X + 18, y: badgeY + badgeH - 17, size: 8, font: boldFont, color: MUTED });
+  page.drawText(data.verificationUid, { x: CONTENT_X + 18, y: badgeY + 10, size: 22, font: boldFont, color: NAVY });
+
+  const pillW = 62;
+  const pillX = CONTENT_X + CONTENT_W - pillW - 14;
+  page.drawRectangle({ x: pillX, y: badgeY + badgeH - 28, width: pillW, height: 18, color: GREEN });
+  const activeText = "ACTIVE";
+  page.drawText(activeText, {
+    x: pillX + (pillW - boldFont.widthOfTextAtSize(activeText, 9)) / 2,
+    y: badgeY + badgeH - 22.5,
+    size: 9,
+    font: boldFont,
+    color: rgb(1, 1, 1),
+  });
+  const regLabel = "REGISTERED " + formatDate(data.registrationDate).toUpperCase();
+  page.drawText(regLabel, {
+    x: pillX + pillW - font.widthOfTextAtSize(regLabel, 7.5),
+    y: badgeY + 9,
+    size: 7.5,
     font,
     color: MUTED,
   });
-  page.drawText(data.verificationUid, {
-    x: CONTENT_X + 14,
-    y: badgeY + 8,
-    size: 20,
-    font: boldFont,
-    color: NAVY,
-  });
 
   // ---- Section helpers ----
-  let cursorY = badgeY - 30;
+  let cursorY = badgeY - 28;
 
   const sectionHeader = (label: string, y: number): number => {
-    page.drawText(label, { x: CONTENT_X, y, size: 11, font: boldFont, color: NAVY });
+    page.drawRectangle({ x: CONTENT_X, y: y - 3, width: 3.5, height: 14, color: GOLD });
+    page.drawText(label, { x: CONTENT_X + 11, y, size: 10, font: boldFont, color: NAVY });
     page.drawLine({
-      start: { x: CONTENT_X, y: y - 5 },
-      end: { x: CONTENT_X + CONTENT_W, y: y - 5 },
+      start: { x: CONTENT_X, y: y - 7 },
+      end: { x: CONTENT_X + CONTENT_W, y: y - 7 },
       thickness: 0.75,
       color: LINE,
     });
-    return y - 26;
+    return y - 24;
   };
 
   const fieldGrid = (fields: [string, string][], startY: number, columns = 2): number => {
@@ -195,7 +220,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
       page.drawText(val, { x, y: y - 14, size: 11, font: boldFont, color: DARK });
       maxRow = Math.max(maxRow, row);
     });
-    return startY - (maxRow + 1) * 34 - 12;
+    return startY - (maxRow + 1) * 34 - 8;
   };
 
   // ---- Customer details ----
@@ -220,7 +245,6 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
       ["Invoice Number", data.invoiceNumber || "-"],
       ["Invoice Date", formatDate(data.invoiceDate || "")],
       ["Installed By", data.installedBy || "-"],
-      ["Seller Code", data.sellerCode || "-"],
       ["Garage / Seller Name", data.garageName || "-"],
     ],
     cursorY,
@@ -250,6 +274,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
 
   // ---- Warranty validity ----
   cursorY = sectionHeader("WARRANTY VALIDITY", cursorY);
+  page.drawRectangle({ x: CONTENT_X - 6, y: cursorY - 20, width: CONTENT_W + 12, height: 33, color: NAVY_LIGHT });
   cursorY = fieldGrid(
     [
       ["Commencement Date", formatDate(data.installationDate)],
@@ -263,6 +288,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
 
   // ---- Manufacturer details ----
   cursorY = sectionHeader("MANUFACTURER DETAILS", cursorY);
+  page.drawRectangle({ x: CONTENT_X - 6, y: cursorY - 32, width: CONTENT_W + 12, height: 45, color: NAVY_LIGHT });
   const mfrColumns: { label: string; lines: string[]; x: number; bold?: boolean }[] = [
     { label: "MANUFACTURER", lines: ["Neoplatron India", "Pvt Ltd"], x: CONTENT_X, bold: true },
     { label: "CONTACT", lines: ["7416493939", "9666636524"], x: CONTENT_X + 140 },
@@ -499,7 +525,7 @@ function appendTermsPages(pdfDoc: PDFDocument, data: WarrantyEmailPayload, font:
   y -= 8;
 
   const isVehicle = data.warrantyType === "vehicle";
-  const installer = [data.garageName, data.sellerCode ? `(Seller Code ${data.sellerCode})` : "", data.installedBy ? `- Technician: ${data.installedBy}` : ""]
+  const installer = [data.garageName, data.installedBy ? `- Technician: ${data.installedBy}` : ""]
     .filter(Boolean)
     .join(" ");
   const rows: [string, string][] = [

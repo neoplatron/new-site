@@ -31,15 +31,19 @@ export async function validateSellerCode(code: string) {
 }
 
 export async function searchWarranty(query: string) {
-  // Search by UID (exact/upper), Phone (exact), or Email (case-insensitive)
-  const cleanQuery = query.trim();
+  // Search by UID (exact/upper), Phone (exact), Email (case-insensitive) or Vehicle Number
+  // Commas and brackets would break the filter syntax below, so drop them.
+  const cleanQuery = query.trim().replace(/[,()]/g, "");
+  // Vehicle numbers are stored upper-case; match with or without spaces/hyphens (TS 09 AB 1234 / TS09AB1234).
+  const vehicleExact = cleanQuery.toUpperCase();
+  const vehicleCompact = vehicleExact.replace(/[\s-]/g, "");
 
   // Using ilike for email to be case-insensitive
   // Also checking phone with "0" prefix for cases where user omits it but DB has it
   const { data, error } = await supabase
     .from("warranty_registrations")
     .select("*")
-    .or(`verification_uid.eq.${cleanQuery.toUpperCase()},phone.eq.${cleanQuery},phone.eq.0${cleanQuery},email.ilike.${cleanQuery}`);
+    .or(`verification_uid.eq.${cleanQuery.toUpperCase()},phone.eq.${cleanQuery},phone.eq.0${cleanQuery},email.ilike.${cleanQuery},vehicle_number.eq.${vehicleExact},vehicle_number.eq.${vehicleCompact}`);
 
   if (error) {
     if (error.code === 'PGRST116') return []; // Not found

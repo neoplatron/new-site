@@ -1415,7 +1415,7 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
 
   const handleCheck = async () => {
     if (!uid.trim()) {
-      setError("Please enter your Warranty UID, Phone, or Email");
+      setError("Please enter your Warranty UID, Phone, Email, or Vehicle Number");
       return;
     }
 
@@ -1515,13 +1515,13 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-text dark:text-d-text mb-2">
-              Enter Warranty UID, Phone Number, or Email
+              Enter Warranty UID, Phone Number, Email, or Vehicle Number
             </label>
             <input
               type="text"
               value={uid}
               onChange={(e) => setUid(e.target.value)}
-              placeholder="e.g., UID, +919876543210, or email@example.com"
+              placeholder="e.g., UID, phone, email, or vehicle number (TS09AB1234)"
               className="w-full px-4 py-3 rounded-lg border border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:ring-2 focus:ring-primary tracking-wider"
             />
           </div>
@@ -1606,7 +1606,6 @@ const CheckWarranty = ({ mode }: { mode: WarrantyMode }) => {
               <InfoItem icon={FileText} label="Invoice Number" value={warrantyData.invoice_number || "-"} />
               <InfoItem icon={Calendar} label="Invoice Date" value={formatDisplayDate(warrantyData.invoice_date)} />
               <InfoItem icon={Wrench} label="Installed By" value={warrantyData.installed_by || "-"} />
-              <InfoItem icon={Store} label="Seller Code" value={warrantyData.seller_code_used || "-"} />
               <InfoItem icon={Store} label="Garage / Seller Name" value={warrantyData.garage_name || "-"} />
             </div>
           </div>
