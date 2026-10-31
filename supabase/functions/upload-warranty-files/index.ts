@@ -88,9 +88,9 @@ const findOrCreateFolder = async (token: string, name: string, parentId?: string
   return created.id;
 };
 
-const uploadFile = async (token: string, folderId: string, fileName: string, mimeType: string, bytes: Uint8Array) => {
+const uploadFile = async (token: string, folderId: string, fileName: string, mimeType: string, bytes: Uint8Array, slot: string) => {
   const boundary = `b${crypto.randomUUID()}`;
-  const metadata = JSON.stringify({ name: fileName, parents: [folderId] });
+  const metadata = JSON.stringify({ name: fileName, parents: [folderId], appProperties: { slot } });
   const enc = new TextEncoder();
   const head = enc.encode(
     `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`,
@@ -157,6 +157,33 @@ const finalize = async (verificationUid: string) => {
 
   const token = await getAccessToken();
   const rootId = await findOrCreateFolder(token, ROOT_FOLDER_NAME);
+
+  // Uploads run in parallel and don't touch the row, so link every uploaded file here in one write.
+  if (r.drive_folder_id) {
+    const listed = await driveFetch(
+      token,
+      `https://www.googleapis.com/drive/v3/files?${new URLSearchParams({
+        q: `'${r.drive_folder_id}' in parents and trashed=false`,
+        fields: "files(id,webViewLink,appProperties)",
+        pageSize: "100",
+      })}`,
+    );
+    const urlBySlot: Record<string, string> = {};
+    for (const f of listed.files ?? []) {
+      const s = f.appProperties?.slot;
+      if (s) urlBySlot[s] = f.webViewLink ?? `https://drive.google.com/file/d/${f.id}/view`;
+    }
+    const links: Record<string, unknown> = {};
+    if (urlBySlot.invoice) links.invoice_data = urlBySlot.invoice;
+    if (urlBySlot.rc) links.vehicle_rc_data = urlBySlot.rc;
+    if (Array.isArray(r.installation_photos)) {
+      links.installation_photos = r.installation_photos.map((p: Record<string, unknown>) =>
+        urlBySlot[p.slot as string] ? { slot: p.slot, label: p.label, name: p.name, type: p.type, url: urlBySlot[p.slot as string] } : p,
+      );
+    }
+    if (Object.keys(links).length) await supabase.from("warranty_registrations").update(links).eq("id", r.id);
+  }
+
   const sheetId = await getSheetId(token, rootId);
 
   const expiry = new Date(r.installation_date);
@@ -223,21 +250,17 @@ Deno.serve(async (req: Request) => {
 
     const base = payload.label ? safeName(payload.label) : slot;
     const fileName = `${base}.${extFor(type, name)}`;
-    const file = await uploadFile(token, folderId, fileName, type, bytes);
+    const file = await uploadFile(token, folderId, fileName, type, bytes, slot);
     const url: string = file.webViewLink ?? `https://drive.google.com/file/d/${file.id}/view`;
 
-    // Swap the stored base64 for the Drive link so the row stays small.
-    const update: Record<string, unknown> = { drive_folder_id: folderId, drive_folder_url: folderUrl };
-    if (slot === "invoice") update.invoice_data = url;
-    else if (slot === "rc") update.vehicle_rc_data = url;
-    else {
-      const photos = Array.isArray(row.installation_photos) ? row.installation_photos : [];
-      update.installation_photos = photos.map((p: Record<string, unknown>) =>
-        p.slot === slot ? { slot: p.slot, label: p.label, name: p.name, type: p.type, url } : p,
-      );
+    // Only the first upload creates the folder; remember it. File links are written once, in finalize.
+    if (!row.drive_folder_id) {
+      const { error: updateError } = await supabase
+        .from("warranty_registrations")
+        .update({ drive_folder_id: folderId, drive_folder_url: folderUrl })
+        .eq("id", row.id);
+      if (updateError) throw updateError;
     }
-    const { error: updateError } = await supabase.from("warranty_registrations").update(update).eq("id", row.id);
-    if (updateError) throw updateError;
 
     return json({ url, folderUrl });
   } catch (error) {

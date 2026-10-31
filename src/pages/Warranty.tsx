@@ -628,8 +628,8 @@ const RegistrationForm = ({
       ].filter(Boolean) as { slot: string; label: string; file: { name: string; type: string }; data: string }[];
 
       const failed: string[] = [];
-      for (const [i, u] of driveUploads.entries()) {
-        setSubmitProgress(`Uploading file ${i + 1} of ${driveUploads.length}...`);
+      let doneCount = 0;
+      const uploadOne = async (u: (typeof driveUploads)[number]) => {
         let uploaded = false;
         for (let attempt = 1; attempt <= 3 && !uploaded; attempt++) {
           const { error: uploadError } = await supabase.functions.invoke("upload-warranty-files", {
@@ -639,6 +639,19 @@ const RegistrationForm = ({
           else uploaded = true;
         }
         if (!uploaded) failed.push(u.label);
+        setSubmitProgress(`Uploading files (${++doneCount} of ${driveUploads.length})...`);
+      };
+
+      // The first upload creates the Drive folder, so it goes alone; the rest run 4 at a time.
+      if (driveUploads.length) {
+        setSubmitProgress(`Uploading files (0 of ${driveUploads.length})...`);
+        await uploadOne(driveUploads[0]);
+        const rest = driveUploads.slice(1);
+        let next = 0;
+        const worker = async () => {
+          while (next < rest.length) await uploadOne(rest[next++]);
+        };
+        await Promise.all(Array.from({ length: Math.min(4, rest.length) }, worker));
       }
       setFailedUploads(failed);
       setSubmitProgress("Finishing up...");
