@@ -145,20 +145,69 @@
   backface-visibility: hidden;
 }
 
+.perspective-1200 {
+  perspective: 1200px;
+}
+
 @keyframes rotate-3d {
   from {
-    transform: rotateY(0deg);
+    transform: rotateX(-4deg) rotateY(0deg);
   }
 
   to {
-    transform: rotateY(-360deg);
+    transform: rotateX(-4deg) rotateY(-360deg);
   }
 }
 
 .animate-rotate-3d {
-  animation: rotate-3d 20s infinite linear;
+  animation: rotate-3d 30s infinite linear;
 }
 
 .animate-rotate-3d:hover {
   animation-play-state: paused;
+}
+
+/* Apple-style glass card for the 3D carousel */
+.apple-card {
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.6) inset,
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 24px 48px -12px rgba(0, 0, 0, 0.12);
+  -webkit-box-reflect: below 10px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.18));
+}
+
+.apple-icon {
+  background: linear-gradient(180deg, #fbfbfd 0%, #f0f0f3 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.dark .apple-card {
+  background: rgba(28, 28, 30, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.06) inset,
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 24px 48px -12px rgba(0, 0, 0, 0.5);
+  -webkit-box-reflect: below 10px linear-gradient(transparent 70%, rgba(255, 255, 255, 0.06));
+}
+
+.dark .apple-icon {
+  background: linear-gradient(180deg, #3a3a3c 0%, #2c2c2e 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rotate-3d {
+    animation: none;
+  }
 }

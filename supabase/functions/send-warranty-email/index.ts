@@ -275,6 +275,95 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     page.drawText(line, { x: CONTENT_X, y: lineY, size: termsSize, font, color: MUTED });
   }
 
+  // ---- Page 2: Money Back Guarantee notes ----
+  const page2 = pdfDoc.addPage([PAGE_W, PAGE_H]);
+  page2.drawRectangle({
+    x: MARGIN,
+    y: MARGIN,
+    width: PAGE_W - 2 * MARGIN,
+    height: PAGE_H - 2 * MARGIN,
+    borderColor: NAVY,
+    borderWidth: 1.5,
+  });
+
+  const wrapText = (text: string, f: PDFFont, size: number, maxWidth: number): string[] => {
+    const lines: string[] = [];
+    let current = "";
+    for (const word of text.split(" ")) {
+      const test = current ? `${current} ${word}` : word;
+      if (f.widthOfTextAtSize(test, size) > maxWidth && current) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+    return lines;
+  };
+
+  let y2 = PAGE_H - MARGIN - 40;
+  page2.drawText("MONEY BACK GUARANTEE - NOTE", { x: CONTENT_X, y: y2, size: 15, font: boldFont, color: NAVY });
+  page2.drawLine({
+    start: { x: CONTENT_X, y: y2 - 8 },
+    end: { x: CONTENT_X + CONTENT_W, y: y2 - 8 },
+    thickness: 1,
+    color: LINE,
+  });
+  y2 -= 34;
+
+  const drawBlock = (heading: string, items: string[], numbered: boolean) => {
+    page2.drawText(heading, { x: CONTENT_X, y: y2, size: 11, font: boldFont, color: NAVY });
+    y2 -= 20;
+    items.forEach((item, i) => {
+      const prefix = numbered ? `${i + 1}.` : "";
+      const textX = CONTENT_X + 18;
+      const lines = wrapText(item, font, 9.5, CONTENT_W - 18);
+      if (prefix) page2.drawText(prefix, { x: CONTENT_X, y: y2, size: 9.5, font: boldFont, color: DARK });
+      lines.forEach((l) => {
+        page2.drawText(l, { x: textX, y: y2, size: 9.5, font, color: DARK });
+        y2 -= 13.5;
+      });
+      y2 -= 5;
+    });
+    y2 -= 10;
+  };
+
+  drawBlock(
+    "Mileage Guarantee",
+    [
+      "Minimum mileage improvement: 30-40% in city and 50% on highway. These are only the minimums covered by the money back guarantee; up to 90% improvement is possible.",
+      "Refund is subject to verification, testing and written approval by Neoplatron India Pvt. Ltd. The 5% GST is excluded, and installation, deinstallation, spare-parts and wiring charges (approx. Rs 3,000 in total) are deducted from any approved refund.",
+    ],
+    true
+  );
+  drawBlock(
+    "Reserve-to-Reserve Mileage Test (Standard SOP)",
+    [
+      "Fill 5 litres of fuel when the reserve light comes on.",
+      "Reset Trip A to zero.",
+      "Drive on the 5 litres until the reserve light comes on again and note the distance on Trip A.",
+      "Repeat the test 3 times in city driving and 3 times on the highway.",
+    ],
+    true
+  );
+  drawBlock(
+    "Note",
+    [
+      "The reserve-to-reserve test is our standard SOP for mileage accuracy.",
+      "We only refund after these tests are completed and the vehicle still does not show the minimum mileage improvement.",
+      "After the tests, we carry out a system calibration.",
+    ],
+    true
+  );
+  page2.drawText("Full terms: neoplatron.in/money-back-policy", {
+    x: CONTENT_X,
+    y: y2,
+    size: 8.5,
+    font,
+    color: MUTED,
+  });
+
   return pdfDoc.save();
 }
 

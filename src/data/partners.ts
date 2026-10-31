@@ -72,18 +72,6 @@ export const PARTNER_TYPE_META: Record<
 // Static partner directory; update here when onboarding/removing a partner
 export const PARTNERS: Partner[] = [
   {
-    id: "dealer-1",
-    type: "dealer",
-    name: "Marvel Auto Centre",
-    city: "Pune",
-    state: "Maharashtra",
-    contactPerson: "Tanveer",
-    phone: "+91 93074 57713",
-    address:
-      "Nizam Park, Gulmohar Society, Next to Dilliwala Dairy, Market Yard, Pune - 37",
-    mapsUrl: "https://maps.app.goo.gl/pSn7AN5BoU4s8Y9s9",
-  },
-  {
     id: "dealer-2",
     type: "dealer",
     name: "Karthikeya Motors",
@@ -94,6 +82,18 @@ export const PARTNERS: Partner[] = [
     address:
       "SV Colony, Chengicharla X Road, Warangal Highway, Pillar No: 122, Hyderabad, Telangana",
     mapsUrl: "https://maps.app.goo.gl/v9y7aJ1VB2F1T8DB9?g_st=iw",
+  },
+  {
+    id: "dealer-1",
+    type: "dealer",
+    name: "Marvel Auto Centre",
+    city: "Pune",
+    state: "Maharashtra",
+    contactPerson: "Tanveer",
+    phone: "+91 93074 57713",
+    address:
+      "Nizam Park, Gulmohar Society, Next to Dilliwala Dairy, Market Yard, Pune - 37",
+    mapsUrl: "https://maps.app.goo.gl/pSn7AN5BoU4s8Y9s9",
   },
   {
     id: "distributor-1",
@@ -119,16 +119,17 @@ export const PARTNERS: Partner[] = [
     mapsUrl:
       "https://www.google.com/maps/search/?api=1&query=16%2F8%2C+Periya+Thoattam%2C+Ondikkaranpalayam%2C+Villarasampatti%2C+Erode+-+638012",
   },
-  {
-    id: "franchise-1",
-    type: "franchise",
-    name: "Green OS Hydrogen Technologies Pvt Ltd",
-    city: "Vijayawada",
-    state: "Andhra Pradesh",
-    contactPerson: "K. Chakradhar",
-    phone: "+91 99661 51436",
-    landline: "0866-3151759",
-    address: "Shop no. 275, Iron Complex, Urmila Subbarao Nagar, Jojinagar, Bhavanipuram, Vijayawada, Andhra Pradesh 520012",
-    mapsUrl: "https://maps.app.goo.gl/MgUGmzoj2LqmPGGR7",
-  },
+  // Temporarily hidden
+  // {
+  //   id: "franchise-1",
+  //   type: "franchise",
+  //   name: "Green OS Hydrogen Technologies Pvt Ltd",
+  //   city: "Vijayawada",
+  //   state: "Andhra Pradesh",
+  //   contactPerson: "K. Chakradhar",
+  //   phone: "+91 99661 51436",
+  //   landline: "0866-3151759",
+  //   address: "Shop no. 275, Iron Complex, Urmila Subbarao Nagar, Jojinagar, Bhavanipuram, Vijayawada, Andhra Pradesh 520012",
+  //   mapsUrl: "https://maps.app.goo.gl/MgUGmzoj2LqmPGGR7",
+  // },
 ];

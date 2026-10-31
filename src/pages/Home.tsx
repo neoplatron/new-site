@@ -17,6 +17,7 @@ import {
   Award,
   Trophy,
   Clock,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -484,6 +485,88 @@ const Home = () => {
           </div>
         </div>
 
+      </section>
+
+      {/* Money Back Guarantee Section */}
+      <section className="py-10 sm:py-16 lg:py-24 relative overflow-hidden bg-bg-dark dark:bg-d-bg-dark">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-primary/10 blur-3xl"></div>
+          <div className="absolute -bottom-24 -right-24 w-72 h-72 rounded-full bg-secondary/10 blur-3xl"></div>
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="rounded-3xl p-px bg-linear-to-br from-primary via-secondary to-tertiary shadow-2xl">
+            <div className="relative overflow-hidden rounded-[calc(1.5rem-1px)] bg-bg-light dark:bg-d-bg-light px-4 pt-10 pb-8 sm:px-10 sm:py-12 lg:px-16 lg:py-14 text-center">
+              <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-secondary to-tertiary"></div>
+
+              <div className="relative w-20 h-20 mx-auto mb-5">
+                <div className="absolute inset-0 rounded-full bg-linear-to-br from-primary to-secondary opacity-20 blur-md"></div>
+                <div className="relative w-20 h-20 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white shadow-lg ring-4 ring-primary/10">
+                  <ShieldCheck className="w-10 h-10" />
+                </div>
+              </div>
+
+              <span className="inline-block mb-4 px-4 py-1 rounded-full border border-primary/30 bg-primary/5 text-xs sm:text-sm font-semibold tracking-widest uppercase text-primary dark:text-d-primary">
+                100% Risk Free
+              </span>
+
+              <h2 className="font-title text-3xl sm:text-4xl lg:text-5xl font-bold text-text dark:text-d-text mb-4 sm:mb-6">
+                Money Back{" "}
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">
+                  Guarantee
+                </span>
+              </h2>
+              <div className="w-24 h-1 bg-linear-to-r from-primary to-secondary mx-auto rounded-full mb-6"></div>
+              <p className="text-base sm:text-lg lg:text-xl text-text-para dark:text-d-text-para max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
+                Don't see the minimum mileage improvement? We guarantee your
+                money back.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 max-w-3xl mx-auto mb-6 sm:mb-10">
+                <div className="group relative rounded-2xl border border-border dark:border-d-border bg-bg dark:bg-d-bg px-3 py-5 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/50">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-text-para dark:text-d-text-para mb-2">
+                    City
+                  </p>
+                  <p className="font-title text-2xl min-[400px]:text-3xl sm:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">
+                    30-40%
+                  </p>
+                  <p className="mt-2 text-xs sm:text-base font-semibold text-text dark:text-d-text leading-snug">
+                    Minimum mileage improvement
+                  </p>
+                </div>
+                <div className="group relative rounded-2xl border border-border dark:border-d-border bg-bg dark:bg-d-bg px-3 py-5 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-secondary/50">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-text-para dark:text-d-text-para mb-2">
+                    Highway
+                  </p>
+                  <p className="font-title text-2xl min-[400px]:text-3xl sm:text-5xl font-bold text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">
+                    50%
+                  </p>
+                  <p className="mt-2 text-xs sm:text-base font-semibold text-text dark:text-d-text leading-snug">
+                    Minimum mileage improvement
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 rounded-2xl bg-linear-to-r from-primary/10 via-secondary/10 to-tertiary/10 border border-primary/20 px-4 sm:px-8 py-4 sm:py-5 mb-8 max-w-2xl mx-auto">
+                <span className="w-10 h-10 shrink-0 rounded-full bg-linear-to-br from-primary to-secondary text-white flex items-center justify-center shadow-md"><Trophy className="w-5 h-5" /></span>
+                <p className="text-sm sm:text-base text-text-para dark:text-d-text-para text-center sm:text-left leading-relaxed">
+                  This is just the minimum improvement covered by our money back
+                  guarantee. You can get an increase of up to{" "}
+                  <span className="font-bold text-text dark:text-d-text">90%</span>.
+                </p>
+              </div>
+
+              <div>
+                <Link
+                  to="/money-back-policy"
+                  className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 px-7 py-3.5 rounded-full bg-linear-to-r from-primary to-secondary text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                >
+                  See detailed terms here
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* CTA Section */}

@@ -14,6 +14,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Partners from "./pages/Partners";
 import Locations from "./pages/Locations";
+import MoneyBackPolicy from "./pages/MoneyBackPolicy";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PartnerPopup from "./components/PartnerPopup";
 import ScrollToTop from "./components/ScrollToTop";
@@ -43,6 +44,7 @@ function AppContent() {
 
         <Route path="/partners" element={<Partners />} />
         <Route path="/locations" element={<Locations />} />
+        <Route path="/money-back-policy" element={<MoneyBackPolicy />} />
         <Route path="/partners/dealers" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/distributors" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/franchise" element={<Navigate to="/partners" replace />} />
