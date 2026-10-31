@@ -263,7 +263,7 @@ const InstallationPhotoSlots = ({
         </span>
       </div>
       <p className="text-xs text-text-muted mb-2">
-        All {PHOTO_SLOTS.length} photos are required; extra photos are optional. Frame each shot like the reference outline. Highlighted parts must be clearly visible.
+        All {PHOTO_SLOTS.length} photos are required (maximum 5 MB per photo); extra photos are optional. Frame each shot like the reference outline. Highlighted parts must be clearly visible.
       </p>
       <div className="h-1.5 rounded-full bg-border/60 dark:bg-d-border/60 overflow-hidden mb-4">
         <div

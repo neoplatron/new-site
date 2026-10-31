@@ -141,7 +141,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     color: LINE,
   });
 
-  // ---- Verification UID badge ----
+  // ---- Warranty UID badge ----
   const badgeY = bannerY - 46;
   const badgeH = 42;
   page.drawRectangle({
@@ -153,7 +153,7 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     borderColor: NAVY,
     borderWidth: 1,
   });
-  page.drawText("VERIFICATION UID", {
+  page.drawText("WARRANTY UID", {
     x: CONTENT_X + 14,
     y: badgeY + badgeH - 16,
     size: 8,
@@ -260,6 +260,28 @@ async function buildWarrantyCardPdf(data: WarrantyEmailPayload): Promise<Uint8Ar
     cursorY,
     4
   );
+
+  // ---- Manufacturer details ----
+  cursorY = sectionHeader("MANUFACTURER DETAILS", cursorY);
+  const mfrColumns: { label: string; lines: string[]; x: number; bold?: boolean }[] = [
+    { label: "MANUFACTURER", lines: ["Neoplatron India", "Pvt Ltd"], x: CONTENT_X, bold: true },
+    { label: "CONTACT", lines: ["7416493939", "9666636524"], x: CONTENT_X + 140 },
+    { label: "EMAIL", lines: ["info@neoplatron.in", "neoplatronindia@gmail.com"], x: CONTENT_X + 240 },
+    { label: "WEBSITE", lines: ["www.neoplatron.in"], x: CONTENT_X + 400 },
+  ];
+  for (const col of mfrColumns) {
+    page.drawText(col.label, { x: col.x, y: cursorY, size: 7.5, font, color: MUTED });
+    col.lines.forEach((text, i) => {
+      page.drawText(text, {
+        x: col.x,
+        y: cursorY - 13 - i * 12,
+        size: 9.5,
+        font: col.bold ? boldFont : font,
+        color: DARK,
+      });
+    });
+  }
+  cursorY -= 13 + 12 + 10;
 
   // ---- Footer ----
   const footerY = MARGIN + 70;
@@ -616,7 +638,7 @@ Deno.serve(async (req: Request) => {
         html: `
           <p>Hi ${payload.customerName},</p>
           <p>Thank you for registering your ${payload.warrantyType === "vehicle" ? "vehicle" : "generator"} installation with Neoplatron.</p>
-          <p>Your Verification UID is <strong>${payload.verificationUid}</strong>. Your warranty certificate is attached as a PDF — please keep it safe, you'll need the UID to check your warranty status or file a claim.</p>
+          <p>Your Warranty UID is <strong>${payload.verificationUid}</strong>. Your warranty certificate is attached as a PDF — please keep it safe, you'll need the UID to check your warranty status or file a claim.</p>
           <p>Regards,<br/>Neoplatron Team</p>
         `,
         attachments: [
