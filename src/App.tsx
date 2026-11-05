@@ -22,6 +22,7 @@ import PartnerPopup from "./components/PartnerPopup";
 import ScrollToTop from "./components/ScrollToTop";
 import NotFound from "./pages/NotFound";
 import GetStarted from "./pages/GetStarted";
+import Links from "./pages/Links";
 import FranchiseForm from "./pages/forms/FranchiseForm";
 import DistributionForm from "./pages/forms/DistributionForm";
 import InstallationForm from "./pages/forms/InstallationForm";
@@ -29,10 +30,12 @@ import InstallationForm from "./pages/forms/InstallationForm";
 function AppContent() {
   const location = useLocation();
   const isAdminRequest = location.pathname.startsWith("/admin");
+  // Link-in-bio page renders standalone, without site chrome
+  const isBareLayout = isAdminRequest || location.pathname === "/links";
 
   return (
     <div className="min-h-screen bg-bg text-text">
-      {!isAdminRequest && <Header />}
+      {!isBareLayout && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<AboutUs />} />
@@ -49,6 +52,7 @@ function AppContent() {
         <Route path="/money-back-policy" element={<MoneyBackPolicy />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/links" element={<Links />} />
         <Route path="/partners/dealers" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/distributors" element={<Navigate to="/partners" replace />} />
         <Route path="/partners/franchise" element={<Navigate to="/partners" replace />} />
@@ -77,8 +81,8 @@ function AppContent() {
         />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {!isAdminRequest && <Footer />}
-      {!isAdminRequest && <PartnerPopup />}
+      {!isBareLayout && <Footer />}
+      {!isBareLayout && <PartnerPopup />}
     </div>
   );
 }

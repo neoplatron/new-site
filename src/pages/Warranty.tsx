@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Shield,
   CheckCircle,
@@ -357,6 +357,7 @@ const RegistrationForm = ({
   const [cardDownloadError, setCardDownloadError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -365,16 +366,93 @@ const RegistrationForm = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // One timer for the floating error, so an older timer can't hide a newer error early.
+  const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showError = (message: string, hideAfterMs: number | null = 4000) => {
+    if (errorTimer.current) clearTimeout(errorTimer.current);
+    setErrorMessage(message);
+    setSubmitStatus("error");
+    errorTimer.current = hideAfterMs
+      ? setTimeout(() => {
+          setSubmitStatus(null);
+          setErrorMessage("");
+        }, hideAfterMs)
+      : null;
+  };
+
   const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
   const sizeMB = (bytes: number) => (bytes / (1024 * 1024)).toFixed(1);
 
-  const handleFileChange = (
+  // Some Android pickers (camera, gallery, WhatsApp) give files with an empty type, so fall back to the extension.
+  const IMAGE_EXT = /\.(jpe?g|png|heic|heif|webp|gif|bmp)$/i;
+  const isImageFile = (f: File) => f.type.startsWith("image/") || (!f.type && IMAGE_EXT.test(f.name));
+  const guessType = (f: File) => {
+    if (f.type) return f.type;
+    const ext = f.name.split(".").pop()?.toLowerCase();
+    if (ext === "pdf") return "application/pdf";
+    if (ext === "png") return "image/png";
+    if (ext === "heic" || ext === "heif") return "image/heic";
+    if (ext === "webp") return "image/webp";
+    return "image/jpeg";
+  };
+
+  // Phone photos are several MB each. Shrinking them is what keeps the upload (the slow part of submitting) short:
+  // 1600px is still sharp enough to read an odometer or serial number. Returns null if it can't be shrunk
+  // (e.g. HEIC on Android Chrome), in which case the original is used.
+  const shrinkImage = async (file: File): Promise<File | null> => {
+    const MAX_DIMENSION = 1600;
+    if (!isImageFile(file) || file.size < 300 * 1024) return null;
+    let bitmap: ImageBitmap | null = null;
+    const canvas = document.createElement("canvas");
+    try {
+      bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      bitmap = null;
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.75));
+      if (!blob || blob.size >= file.size) return null;
+      const base = (file.name || "photo").replace(/\.[^.]+$/, "");
+      return new File([blob], `${base}.jpg`, { type: "image/jpeg", lastModified: file.lastModified });
+    } catch {
+      return null;
+    } finally {
+      bitmap?.close();
+      // Free the canvas memory straight away; low-memory phones crash the tab if several pile up.
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  };
+
+  // On Android, a picked file is often only a link to the gallery / Google Photos / Drive. It can become unreadable
+  // by the time the form is submitted (app switched, cloud photo, low memory), which made Submit fail.
+  // Taking our own in-memory copy right away (shrunk, for photos) avoids that, tells the user immediately if the
+  // file can't be read, and means Submit can start uploading straight away.
+  const snapshotFile = async (file: File): Promise<File | null> => {
+    const shrunk = await shrinkImage(file);
+    if (shrunk) return shrunk;
+    try {
+      const bytes = await file.arrayBuffer();
+      return new File([bytes], file.name || "upload", { type: guessType(file), lastModified: file.lastModified });
+    } catch (err) {
+      console.error("Could not read picked file:", file.name, err);
+      return null;
+    }
+  };
+  const unreadableMessage = (what: string, name: string) =>
+    `${what}: "${name}" could not be opened on this phone. Please select it again, or take a new photo with the camera.`;
+
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: "invoice" | "vehicleRC" | "odometerPhoto" | "mileagePhoto"
   ) => {
-    const file = e.target.files?.[0] ?? null;
+    const picked = e.target.files?.[0] ?? null;
     e.currentTarget.value = "";
-    if (!file) return;
+    if (!picked) return;
 
     const what = {
       invoice: "Invoice",
@@ -383,35 +461,48 @@ const RegistrationForm = ({
       mileagePhoto: "Present mileage photo",
     }[fieldName];
     const imageOnly = fieldName === "odometerPhoto" || fieldName === "mileagePhoto";
-    if (file.size > MAX_UPLOAD_BYTES) {
-      setUploadError(`${what} "${file.name}" is ${sizeMB(file.size)} MB. The maximum allowed is 5 MB. Please choose a smaller file.`);
+    if (picked.size > MAX_UPLOAD_BYTES) {
+      setUploadError(`${what} "${picked.name}" is ${sizeMB(picked.size)} MB. The maximum allowed is 5 MB. Please choose a smaller file.`);
       return;
     }
-    if (imageOnly ? !file.type.startsWith("image/") : !/.(pdf|jpe?g|png)$/i.test(file.name)) {
+    const okType = imageOnly
+      ? isImageFile(picked)
+      : /^(application\/pdf|image\/(jpe?g|png))$/i.test(picked.type) || /\.(pdf|jpe?g|png)$/i.test(picked.name);
+    if (!okType) {
       setUploadError(
         imageOnly
-          ? `${what} "${file.name}" is not an image. Please upload a photo (JPG, PNG or HEIC).`
-          : `${what} "${file.name}" is not a supported file type. Please upload a PDF, JPG or PNG.`,
+          ? `${what} "${picked.name}" is not an image. Please upload a photo (JPG, PNG or HEIC).`
+          : `${what} "${picked.name}" is not a supported file type. Please upload a PDF, JPG or PNG.`,
       );
       return;
     }
 
+    const file = await snapshotFile(picked);
+    if (!file) {
+      setUploadError(unreadableMessage(what, picked.name));
+      return;
+    }
     setUploadError("");
     setFiles((prev) => ({ ...prev, [fieldName]: file }));
   };
 
-  const handleSlotPhotoChange = (slot: PhotoSlotKey, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleSlotPhotoChange = async (slot: PhotoSlotKey, e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = e.target.files?.[0];
     e.currentTarget.value = "";
-    if (!file) return;
+    if (!picked) return;
 
     const label = PHOTO_SLOTS.find((s) => s.key === slot)?.label[mode] ?? "Photo";
-    if (!file.type.startsWith("image/")) {
-      setUploadError(`${label}: "${file.name}" is not an image. Please upload a photo (JPG, PNG or HEIC).`);
+    if (!isImageFile(picked)) {
+      setUploadError(`${label}: "${picked.name}" is not an image. Please upload a photo (JPG, PNG or HEIC).`);
       return;
     }
-    if (file.size > MAX_UPLOAD_BYTES) {
-      setUploadError(`${label}: photo "${file.name}" is ${sizeMB(file.size)} MB. The maximum allowed is 5 MB per photo. Please choose a smaller photo.`);
+    if (picked.size > MAX_UPLOAD_BYTES) {
+      setUploadError(`${label}: photo "${picked.name}" is ${sizeMB(picked.size)} MB. The maximum allowed is 5 MB per photo. Please choose a smaller photo.`);
+      return;
+    }
+    const file = await snapshotFile(picked);
+    if (!file) {
+      setUploadError(unreadableMessage(label, picked.name));
       return;
     }
 
@@ -426,12 +517,12 @@ const RegistrationForm = ({
     });
   };
 
-  const handleExtraPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExtraPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? []);
     e.currentTarget.value = "";
     if (picked.length === 0) return;
 
-    const notImage = picked.find((f) => !f.type.startsWith("image/"));
+    const notImage = picked.find((f) => !isImageFile(f));
     if (notImage) {
       setUploadError(`Additional photos: "${notImage.name}" is not an image. Please upload photos only (JPG, PNG or HEIC).`);
       return;
@@ -442,8 +533,18 @@ const RegistrationForm = ({
       return;
     }
 
+    const copies: File[] = [];
+    for (const f of picked) {
+      const copy = await snapshotFile(f);
+      if (!copy) {
+        setUploadError(unreadableMessage("Additional photos", f.name) + " None of the selected photos were added.");
+        return;
+      }
+      copies.push(copy);
+    }
+
     setUploadError("");
-    const newPics: SlotPhoto[] = picked.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
+    const newPics: SlotPhoto[] = copies.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
     setFiles((prev) => ({
       ...prev,
       extraPics: [...prev.extraPics, ...newPics].slice(0, MAX_EXTRA_PHOTOS),
@@ -469,30 +570,19 @@ const RegistrationForm = ({
   const readAsDataURL = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
+      // FileReader rejects with a ProgressEvent, which has no message; turn it into a readable Error.
+      reader.onerror = () => reject(new Error(`Could not read "${(file as File).name ?? "file"}". Please select it again.`));
+      reader.readAsDataURL(file);
     });
   };
 
-  // Phone photos are several MB each; shrinking them keeps the upload (the slow part of submitting) short.
-  const fileToBase64 = async (file: File): Promise<string> => {
-    const MAX_DIMENSION = 1800;
-    if (!file.type.startsWith("image/") || file.size < 400 * 1024) return readAsDataURL(file);
-    try {
-      const bitmap = await createImageBitmap(file);
-      const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(bitmap.width * scale);
-      canvas.height = Math.round(bitmap.height * scale);
-      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      bitmap.close();
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.8));
-      return blob && blob.size < file.size ? readAsDataURL(blob) : readAsDataURL(file);
-    } catch {
-      return readAsDataURL(file);
-    }
-  };
+  // Files are already shrunk when picked (see snapshotFile), so submitting only has to read them.
+  const fileToBase64 = (file: File): Promise<string> => readAsDataURL(file);
+
+  // Phone keyboards may type "12,5" or "45,000"; normalise before checking and saving.
+  const economyValue = () => formData.avgFuelEconomy.trim().replace(",", ".");
+  const kmsValue = () => formData.kmsDriven.trim().replace(/[\s,.]/g, "");
 
   const validateStep = (step: number): { isValid: boolean; message: string } => {
     if (step === 1) {
@@ -505,12 +595,13 @@ const RegistrationForm = ({
       if (!formData.phone.trim()) return { isValid: false, message: "Phone Number is required" };
       if (!formData.email.trim()) return { isValid: false, message: "Email Address is required" };
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) return { isValid: false, message: "Please enter a valid email address" };
+      // Android keyboards often add a trailing space after autocomplete, so trim before checking.
+      if (!emailRegex.test(formData.email.trim())) return { isValid: false, message: "Please enter a valid email address" };
       if (!formData.customerAddress.trim()) return { isValid: false, message: "Customer Address is required" };
       if (!formData.city.trim()) return { isValid: false, message: "City is required" };
       if (!formData.state.trim()) return { isValid: false, message: "State is required" };
       if (!formData.pinCode.trim()) return { isValid: false, message: "PIN Code is required" };
-      if (!/^\d{6}$/.test(formData.pinCode)) return { isValid: false, message: "Please enter a valid 6-digit PIN Code" };
+      if (!/^\d{6}$/.test(formData.pinCode.trim())) return { isValid: false, message: "Please enter a valid 6-digit PIN Code" };
     }
 
     if (step === 3) {
@@ -552,8 +643,9 @@ const RegistrationForm = ({
         if (!formData.vehicleNumber.trim()) return { isValid: false, message: "Vehicle Number is required" };
         if (!formData.fuelType) return { isValid: false, message: "Fuel Type is required" };
         if (!formData.kmsDriven.trim()) return { isValid: false, message: "Kilometers Driven is required" };
-        const economy = parseFloat(formData.avgFuelEconomy);
-        if (!formData.avgFuelEconomy.trim() || !(economy > 0)) return { isValid: false, message: "Please enter the average fuel economy (km/l) before installing" };
+        if (!/^\d+$/.test(kmsValue())) return { isValid: false, message: "Kilometers Driven must be a whole number, e.g. 45000" };
+        const economy = parseFloat(economyValue());
+        if (!economyValue() || !(economy > 0)) return { isValid: false, message: "Please enter the average fuel economy (km/l) before installing" };
         if (!files.odometerPhoto) return { isValid: false, message: "Please upload the kilometers driven photo" };
         if (!noAvgDisplay && !files.mileagePhoto) return { isValid: false, message: "Please upload the present mileage (before installing) photo, or tick that the vehicle doesn't show average mileage" };
       }
@@ -565,12 +657,7 @@ const RegistrationForm = ({
   const nextStep = () => {
     const validation = validateStep(currentStep);
     if (!validation.isValid) {
-      setErrorMessage(validation.message);
-      setSubmitStatus("error");
-      setTimeout(() => {
-        setSubmitStatus(null);
-        setErrorMessage("");
-      }, 3000);
+      showError(validation.message);
       return;
     }
     setUploadError("");
@@ -583,33 +670,36 @@ const RegistrationForm = ({
   };
 
   const handleSubmit = async () => {
+    // A quick double tap on phones can fire this twice before the button re-renders as disabled.
+    if (submittingRef.current) return;
     setErrorMessage("");
 
     for (let step = 1; step <= 4; step++) {
       const validation = validateStep(step);
       if (!validation.isValid) {
-        setErrorMessage(validation.message);
-        setSubmitStatus("error");
-        setTimeout(() => {
-          setSubmitStatus(null);
-          setErrorMessage("");
-        }, 5000);
+        showError(validation.message, 6000);
         return;
       }
     }
 
     if (!termsAccepted) {
-      setErrorMessage("Please accept the Warranty Terms & Conditions");
-      setSubmitStatus("error");
-      setTimeout(() => {
-        setSubmitStatus(null);
-        setErrorMessage("");
-      }, 3000);
+      showError("Please accept the Warranty Terms & Conditions");
       return;
     }
 
+    submittingRef.current = true;
     setIsSubmitting(true);
+    if (errorTimer.current) clearTimeout(errorTimer.current);
     setSubmitStatus(null);
+
+    // Keep the screen on during the upload; when an Android phone sleeps, the browser pauses the page and the upload stalls.
+    let wakeLock: { release: () => Promise<void> } | null = null;
+    try {
+      wakeLock = await (navigator as Navigator & { wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } })
+        .wakeLock?.request("screen") ?? null;
+    } catch {
+      /* not supported or not allowed; carry on without it */
+    }
 
     try {
       const uid = generateUID();
@@ -622,36 +712,33 @@ const RegistrationForm = ({
       const vehicleRCBase64 = files.vehicleRC ? await fileToBase64(files.vehicleRC) : null;
       const odometerBase64 = mode === "vehicle" && files.odometerPhoto ? await fileToBase64(files.odometerPhoto) : null;
       const mileageBase64 = mode === "vehicle" && files.mileagePhoto ? await fileToBase64(files.mileagePhoto) : null;
-      const garagePicsBase64 = await Promise.all([
-        ...PHOTO_SLOTS.map(async (s) => {
-          const pic = files.garagePics[s.key]!;
-          return {
-            data: await fileToBase64(pic.file),
-            name: pic.file.name,
-            type: pic.file.type,
-            slot: s.key,
-            label: s.label[mode],
-          };
-        }),
-        ...files.extraPics.map(async (pic, i) => ({
-          data: await fileToBase64(pic.file),
-          name: pic.file.name,
-          type: pic.file.type,
-          slot: `extra${i + 1}`,
-          label: `Additional Photo ${i + 1}`,
-        })),
-      ]);
+      // One photo at a time: decoding many full-size phone photos at once runs low-memory Android phones out of memory.
+      const photoJobs = [
+        ...PHOTO_SLOTS.map((s) => ({ file: files.garagePics[s.key]!.file, slot: s.key as string, label: s.label[mode] })),
+        ...files.extraPics.map((pic, i) => ({ file: pic.file, slot: `extra${i + 1}`, label: `Additional Photo ${i + 1}` })),
+      ];
+      const garagePicsBase64: { data: string; name: string; type: string; slot: string; label: string }[] = [];
+      for (const [i, job] of photoJobs.entries()) {
+        setSubmitProgress(`Preparing photos (${i + 1} of ${photoJobs.length})...`);
+        garagePicsBase64.push({
+          data: await fileToBase64(job.file),
+          name: job.file.name,
+          type: job.file.type,
+          slot: job.slot,
+          label: job.label,
+        });
+      }
 
       const registration = {
         verification_uid: uid,
         warranty_type: mode,
-        customer_name: formData.customerName,
-        email: formData.email,
-        phone: formData.phone,
+        customer_name: formData.customerName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
         customer_address: formData.customerAddress,
         city: formData.city,
         state: formData.state,
-        pin_code: formData.pinCode,
+        pin_code: formData.pinCode.trim(),
         installation_date: formData.installationDate,
         invoice_number: formData.invoiceNumber,
         invoice_date: formData.invoiceDate,
@@ -669,12 +756,12 @@ const RegistrationForm = ({
         product_type: formData.productType,
         install_product_type: formData.installProductType,
         fuel_type: mode === "vehicle" ? formData.fuelType : null,
-        kms_driven: mode === "vehicle" && formData.kmsDriven ? parseInt(formData.kmsDriven) : null,
+        kms_driven: mode === "vehicle" && kmsValue() ? parseInt(kmsValue(), 10) : null,
         invoice_data: null,
         vehicle_rc_data: null,
         // Only metadata here; the image files themselves go to Google Drive.
         installation_photos: garagePicsBase64.map(({ data: _data, ...meta }) => meta),
-        avg_fuel_economy: mode === "vehicle" ? formData.avgFuelEconomy.trim() : null,
+        avg_fuel_economy: mode === "vehicle" ? economyValue() : null,
       };
 
       let { error } = await supabase.from("warranty_registrations").insert(registration);
@@ -702,6 +789,8 @@ const RegistrationForm = ({
         for (let attempt = 1; attempt <= 3 && !uploaded; attempt++) {
           const startedAt = performance.now();
           const { error: uploadError } = await supabase.functions.invoke("upload-warranty-files", {
+            // On a weak mobile signal a request can hang for minutes; give up and retry instead.
+            timeout: 45000,
             body: { verificationUid: uid, slot: u.slot, label: u.label, name: u.data.startsWith("data:image/jpeg") ? u.file.name.replace(/.[^.]+$/, "") + ".jpg" : u.file.name, type: u.data.slice(5, u.data.indexOf(";")), data: u.data },
           });
           const seconds = ((performance.now() - startedAt) / 1000).toFixed(1);
@@ -727,31 +816,41 @@ const RegistrationForm = ({
         await Promise.all(Array.from({ length: Math.min(4, rest.length) }, worker));
       }
       setFailedUploads(failed);
-      setSubmitProgress("Finishing up...");
 
-      // Log the registration (with the Drive folder link) to the Google Sheet.
-      const { error: sheetError } = await supabase.functions.invoke("upload-warranty-files", {
-        body: { action: "finalize", verificationUid: uid },
-      });
-      if (sheetError) console.error("Sheet logging failed:", sheetError);
+      // Log the registration (with the Drive folder link) to the Google Sheet. This makes several Google calls,
+      // so don't make the user wait for it; keepalive lets it finish even if the page is closed.
+      fetch(`${SUPABASE_URL}/functions/v1/upload-warranty-files`, {
+        method: "POST",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ action: "finalize", verificationUid: uid }),
+      })
+        .then((res) => {
+          if (!res.ok) console.error("Sheet logging failed:", res.status);
+        })
+        .catch((sheetError) => console.error("Sheet logging failed:", sheetError));
 
       const expiryDate = new Date(formData.installationDate);
       expiryDate.setFullYear(expiryDate.getFullYear() + WARRANTY_PERIOD_YEARS);
 
       const payload = {
-        email: formData.email,
-        customerName: formData.customerName,
-        phone: formData.phone,
+        email: formData.email.trim(),
+        customerName: formData.customerName.trim(),
+        phone: formData.phone.trim(),
         customerAddress: formData.customerAddress,
         city: formData.city,
         state: formData.state,
-        pinCode: formData.pinCode,
+        pinCode: formData.pinCode.trim(),
         verificationUid: uid,
         warrantyType: mode,
         productType: formData.productType,
         vehicleNumber: mode === "vehicle" ? formData.vehicleNumber.toUpperCase() : null,
         fuelType: mode === "vehicle" ? formData.fuelType : null,
-        kmsDriven: mode === "vehicle" ? formData.kmsDriven : null,
+        kmsDriven: mode === "vehicle" ? kmsValue() : null,
         installationDate: formData.installationDate,
         invoiceNumber: formData.invoiceNumber,
         invoiceDate: formData.invoiceDate,
@@ -777,15 +876,22 @@ const RegistrationForm = ({
       setSubmitStatus("success");
     } catch (error) {
       console.error("Error submitting warranty:", error);
-      setErrorMessage(error instanceof Error ? error.message : "Submission failed");
-      setSubmitStatus("error");
-      setTimeout(() => {
-        setSubmitStatus(null);
-        setErrorMessage("");
-      }, 5000);
+      // Supabase errors are plain objects (not Error), so read .message from either kind.
+      const raw = (error as { message?: string })?.message || "";
+      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      const network = offline || /failed to fetch|network|load failed|timeout/i.test(raw);
+      const message = network
+        ? "Could not reach the server. Please check your internet connection and tap Submit again."
+        : raw
+          ? `Submission failed: ${raw}`
+          : "Submission failed. Please try again.";
+      // Stays on screen until dismissed so it isn't missed.
+      showError(message, null);
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
       setSubmitProgress("");
+      wakeLock?.release().catch(() => {});
     }
   };
 
@@ -868,6 +974,7 @@ const RegistrationForm = ({
 
         <p className="text-sm text-text-muted dark:text-d-text-muted mb-6">
           Keep this UID safe. You'll need it to check your warranty status or file a claim.
+          {mode === "vehicle" && " You can also check your warranty using the vehicle number you entered."}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -937,10 +1044,23 @@ const RegistrationForm = ({
       {/* Form */}
       <div className="bg-bg-light dark:bg-d-bg-light rounded-2xl p-6 sm:p-8 border-2 border-border dark:border-d-border">
         {/* Error Message */}
+        {/* Fixed to the viewport so it stays visible wherever the user has scrolled */}
         {submitStatus === "error" && errorMessage && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-            <span className="text-red-600">{errorMessage}</span>
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-2rem)] max-w-md p-4 bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 rounded-lg shadow-lg flex items-start gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <span className="flex-1 text-red-600">{errorMessage}</span>
+            <button
+              type="button"
+              onClick={() => { setErrorMessage(""); setSubmitStatus(null); }}
+              className="text-red-600 hover:text-red-800 text-lg leading-none"
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
           </div>
         )}
 
@@ -994,7 +1114,7 @@ const RegistrationForm = ({
                     type="button"
                     onClick={async () => {
                       if (formData.sellerCode.length < 8) {
-                        setErrorMessage("Code must be 8 digits");
+                        showError("Code must be 8 digits");
                         return;
                       }
 
@@ -1007,7 +1127,7 @@ const RegistrationForm = ({
                       } else {
                         setSellerId(null);
                         setSellerVerified(false);
-                        setErrorMessage("Invalid Seller Code");
+                        showError("Invalid Seller Code");
                       }
                     }}
                     className={`px-6 py-2 rounded-lg transition-colors font-medium text-white ${sellerVerified
@@ -1047,7 +1167,7 @@ const RegistrationForm = ({
               <InputField label="Full Name" name="customerName" value={formData.customerName} onChange={handleChange} required />
               <InputField label="Email Address" name="email" type="email" value={formData.email} onChange={handleChange} required />
               <InputField label="Phone Number" name="phone" type="tel" value={formData.phone} onChange={handleChange} required />
-              <InputField label="PIN Code" name="pinCode" value={formData.pinCode} onChange={handleChange} maxLength={6} required />
+              <InputField label="PIN Code" name="pinCode" inputMode="numeric" value={formData.pinCode} onChange={handleChange} maxLength={6} required />
             </div>
             <InputField label="Address" name="customerAddress" value={formData.customerAddress} onChange={handleChange} required />
             <div className="grid sm:grid-cols-2 gap-4">
@@ -1201,7 +1321,7 @@ const RegistrationForm = ({
                     ]}
                     required
                   />
-                  <InputField label="Kilometers Driven" name="kmsDriven" type="number" value={formData.kmsDriven} onChange={handleChange} required />
+                  <InputField label="Kilometers Driven" name="kmsDriven" inputMode="numeric" value={formData.kmsDriven} onChange={handleChange} required />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -1244,7 +1364,7 @@ const RegistrationForm = ({
                       <InputField
                         label="Average Fuel Economy (km/l)"
                         name="avgFuelEconomy"
-                        type="number"
+                        inputMode="decimal"
                         value={formData.avgFuelEconomy}
                         onChange={handleChange}
                         placeholder="e.g. 12.5"
@@ -1336,6 +1456,11 @@ const RegistrationForm = ({
             </button>
           )}
         </div>
+        {isSubmitting && (
+          <p className="mt-3 text-sm text-text-muted dark:text-d-text-muted text-right">
+            Please keep this screen open and don't switch apps until it finishes.
+          </p>
+        )}
       </div>
     </div >
   );
@@ -1887,6 +2012,7 @@ const InputField = ({
   min,
   max,
   placeholder,
+  inputMode,
 }: {
   label: string;
   name: string;
@@ -1898,6 +2024,7 @@ const InputField = ({
   min?: string;
   max?: string;
   placeholder?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) => (
   <div>
     <label className="block text-sm font-medium text-text dark:text-d-text mb-2">
@@ -1912,6 +2039,7 @@ const InputField = ({
       min={min}
       max={max}
       placeholder={placeholder}
+      inputMode={inputMode}
       className="w-full px-4 py-3 rounded-lg border border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:ring-2 focus:ring-primary"
       required={required}
     />
