@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle, Send, XCircle } from "lucide-react";
-import { submitToSheet } from "../../api/sheetFormAPI";
+import { submitInstallationLead } from "../../api/leadsAPI";
+import { INDIAN_STATES } from "../../data/indianStates";
 import SubmissionSuccess from "../../components/SubmissionSuccess";
 import SEO from "../../components/SEO";
 
@@ -26,7 +27,8 @@ const InstallationForm = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     mobileNumber: "",
-    cityState: "",
+    city: "",
+    state: "",
     installTarget: "",
     vehicleBrandModel: "",
     engineCapacity: "",
@@ -63,12 +65,13 @@ const InstallationForm = () => {
     setSubmitStatus(null);
 
     try {
-      await submitToSheet("installation", formData);
+      await submitInstallationLead(formData);
       setSubmitStatus("success");
       setFormData({
         fullName: "",
         mobileNumber: "",
-        cityState: "",
+        city: "",
+        state: "",
         installTarget: "",
         vehicleBrandModel: "",
         engineCapacity: "",
@@ -240,23 +243,42 @@ const InstallationForm = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <label
-                        htmlFor="cityState"
-                        className="block text-sm font-semibold text-text dark:text-d-text mb-2"
-                      >
-                        City & State <span className="text-error">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="cityState"
-                        name="cityState"
-                        required
-                        value={formData.cityState}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
-                        placeholder="Which city&State are you from?"
-                      />
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <label htmlFor="city" className="block text-sm font-semibold text-text dark:text-d-text mb-2">
+                          City / Town <span className="text-error">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="city"
+                          name="city"
+                          required
+                          value={formData.city}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
+                          placeholder="e.g. Hyderabad"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="state" className="block text-sm font-semibold text-text dark:text-d-text mb-2">
+                          State <span className="text-error">*</span>
+                        </label>
+                        <select
+                          id="state"
+                          name="state"
+                          required
+                          value={formData.state}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text focus:outline-none focus:border-primary dark:focus:border-d-primary transition-all placeholder:text-text-muted/60 dark:placeholder:text-d-text-muted/60"
+                        >
+                          <option value="">Select your state</option>
+                          {INDIAN_STATES.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     <div>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../integrations/supabase/client";
 import {
-    LogOut,
     Trash2,
     Search,
     UserPlus,
@@ -15,6 +14,8 @@ import {
     Edit
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAdminRole } from "../hooks/useAdminRole";
+import AdminLayout from "../components/admin/AdminLayout";
 import type { Database } from "../integrations/supabase/types";
 import SEO from "../components/SEO";
 
@@ -25,13 +26,36 @@ type Seller = Database['public']['Tables']['sellers']['Row'];
 type WarrantyRegistration = Database['public']['Tables']['warranty_registrations']['Row'];
 type WhitelistedAdmin = Database['public']['Tables']['admin_whitelist']['Row'];
 
-export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<'sellers' | 'registrations' | 'admins'>('sellers');
+// Readable temporary password (no look-alike characters such as 0/O or 1/l).
+function generateTempPassword() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    const bytes = crypto.getRandomValues(new Uint8Array(10));
+    return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+}
+
+// The list loads only light columns. invoice_data, vehicle_rc_data and installation_photos can hold
+// embedded files (megabytes per row), which made the whole list slow enough to time out.
+const WARRANTY_LIST_COLS =
+    "id, verification_uid, warranty_type, customer_name, phone, city, state, product_type, vehicle_number, installation_date, seller_code_used, garage_name, created_at";
+type WarrantyListRow = Pick<WarrantyRegistration,
+    "id" | "verification_uid" | "warranty_type" | "customer_name" | "phone" | "city" | "state" | "product_type"
+    | "vehicle_number" | "installation_date" | "seller_code_used" | "garage_name" | "created_at">;
+
+type Tab = 'sellers' | 'registrations' | 'admins';
+const TAB_TITLE: Record<Tab, string> = {
+    sellers: "Sellers",
+    registrations: "Warranty Registrations",
+    admins: "Team & Roles",
+};
+
+export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
     const [sellers, setSellers] = useState<Seller[]>([]);
-    const [registrations, setRegistrations] = useState<WarrantyRegistration[]>([]);
+    const [registrations, setRegistrations] = useState<WarrantyListRow[]>([]);
+    const [viewingId, setViewingId] = useState<string | null>(null);
     const [admins, setAdmins] = useState<WhitelistedAdmin[]>([]);
-    const [currentRole, setCurrentRole] = useState<'master' | 'admin' | null>(null);
-    const [currentUserEmail, setCurrentUserEmail] = useState("");
+    const { role: currentRole, email: currentUserEmail, loading: roleLoading } = useAdminRole();
+    // Telecallers only get leads; the team page is master-only.
+    const allowed = currentRole === 'master' || (currentRole === 'admin' && activeTab !== 'admins');
 
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -50,63 +74,48 @@ export default function AdminDashboard() {
 
     // Admin Invite State
     const [inviteEmail, setInviteEmail] = useState("");
+    const [inviteName, setInviteName] = useState("");
+    const [inviteRole, setInviteRole] = useState<'admin' | 'telecaller'>('telecaller');
+    const [invitePassword, setInvitePassword] = useState(generateTempPassword);
+    const [createdLogin, setCreatedLogin] = useState<{ email: string; password: string; existing: boolean; role: string } | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const copyLogin = async () => {
+        if (!createdLogin) return;
+        const portal = createdLogin.role === 'telecaller' ? '/team' : '/admin';
+        const text = `Login: ${window.location.origin}${portal}\nEmail: ${createdLogin.email}\nTemporary password: ${createdLogin.password}`;
+        let ok = false;
+        try {
+            await navigator.clipboard.writeText(text);
+            ok = true;
+        } catch {
+            // Clipboard API is unavailable on non-HTTPS pages and some browsers: fall back to a hidden textarea.
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            ok = document.execCommand("copy");
+            ta.remove();
+        }
+        if (!ok) return alert("Could not copy automatically. Please select the details and copy them by hand.");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     useEffect(() => {
-        checkUserRole();
-    }, []);
-
-    useEffect(() => {
+        if (roleLoading) return;
+        if (!allowed) {
+            navigate('/admin/leads', { replace: true });
+            return;
+        }
+        setSearchTerm("");
         if (activeTab === 'sellers') fetchSellers();
         else if (activeTab === 'registrations') fetchRegistrations();
         else if (activeTab === 'admins') fetchAdmins();
-    }, [activeTab]);
-
-    const checkUserRole = async () => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                navigate("/admin");
-                return;
-            }
-
-            if (user.email) {
-                setCurrentUserEmail(user.email);
-
-                // STRICT WHITELIST CHECK
-                // We must verify they are still in the whitelist before proceeding.
-                // If not, they are essentially revoked and should not have access.
-                const { data: whitelistData, error: whitelistError } = await supabase
-                    .from('admin_whitelist')
-                    .select('role')
-                    .eq('email', user.email)
-                    .single();
-
-                if (whitelistError || !whitelistData) {
-                    console.error("User not found in whitelist. Access revoked.");
-                    await supabase.auth.signOut();
-                    alert("Your access has been revoked.");
-                    navigate("/admin");
-                    return;
-                }
-            }
-
-            const { data } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', user.id)
-                .single();
-
-            if (data) {
-                setCurrentRole(data.role as 'master' | 'admin');
-            } else {
-                // Should ideally not reach here if whitelist check passed and trigger worked,
-                // but just in case, treat as authorized with no specific role or fallback
-            }
-        } catch (error) {
-            console.error("Error checking role:", error);
-        }
-    };
+    }, [activeTab, roleLoading, allowed, navigate]);
 
     const fetchAdmins = async () => {
         setLoading(true);
@@ -148,11 +157,11 @@ export default function AdminDashboard() {
         try {
             const { data, error } = await supabase
                 .from("warranty_registrations")
-                .select("*")
+                .select(WARRANTY_LIST_COLS)
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
-            setRegistrations(data || []);
+            setRegistrations((data || []) as unknown as WarrantyListRow[]);
         } catch (error) {
             console.error("Error fetching registrations:", error);
             alert("Failed to load registrations");
@@ -161,9 +170,23 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate("/admin");
+    // Full record (with documents and photos) is fetched only when one is opened.
+    const openWarranty = async (id: string) => {
+        setViewingId(id);
+        try {
+            const { data, error } = await supabase
+                .from("warranty_registrations")
+                .select("*")
+                .eq("id", id)
+                .single();
+            if (error) throw error;
+            setSelectedWarranty(data);
+        } catch (error) {
+            console.error("Error loading warranty:", error);
+            alert("Failed to load this warranty's details");
+        } finally {
+            setViewingId(null);
+        }
     };
 
     const generateSellerCode = () => {
@@ -242,19 +265,25 @@ export default function AdminDashboard() {
         e.preventDefault();
         setSubmitting(true);
         try {
-            const { error } = await supabase.from('admin_whitelist').insert({
-                email: inviteEmail,
-                role: 'admin'
+            const email = inviteEmail.trim().toLowerCase();
+            const { data, error } = await supabase.functions.invoke('create-staff-user', {
+                body: { email, password: invitePassword, role: inviteRole, name: inviteName },
             });
+            if (error) {
+                // Non-2xx responses carry the real reason in the response body.
+                const detail = await (error as { context?: Response }).context?.json?.().catch(() => null);
+                throw new Error(detail?.error || error.message);
+            }
+            if (data?.error) throw new Error(data.error);
 
-            if (error) throw error;
-
+            setCreatedLogin({ email, password: invitePassword, existing: !!data?.existing, role: inviteRole });
             setInviteEmail("");
+            setInviteName("");
+            setInvitePassword(generateTempPassword());
             fetchAdmins();
-            alert("Admin invited! They can now sign up via the Admin Portal.");
         } catch (error) {
-            console.error("Error inviting users:", error);
-            alert("Failed to invite admin. Email might already exist.");
+            console.error("Error creating user:", error);
+            alert("Failed to create login: " + (error instanceof Error ? error.message : "unknown error"));
         } finally {
             setSubmitting(false);
         }
@@ -293,72 +322,18 @@ export default function AdminDashboard() {
         (r.phone && r.phone.includes(searchTerm))
     );
 
+    if (roleLoading || !allowed) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-d-bg">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-bg dark:bg-d-bg font-body transition-colors duration-300">
-            <SEO title="Admin Dashboard - Neoplatron" noindex />
-            {/* Navigation */}
-            <nav className="border-b border-border dark:border-d-border bg-white dark:bg-d-bg-light sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                <Shield className="w-5 h-5 text-primary" />
-                            </div>
-                            <span className="font-title text-xl font-bold text-text dark:text-d-text">
-                                Admin Portal
-                            </span>
-                            {currentRole === 'master' && (
-                                <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full font-bold border border-purple-200">
-                                    MASTER
-                                </span>
-                            )}
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 text-text-muted hover:text-red-500 transition-colors"
-                        >
-                            <LogOut className="w-4 h-4" />
-                            <span className="hidden sm:inline">Sign Out</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Tabs */}
-                <div className="flex flex-wrap gap-4 mb-8">
-                    <button
-                        onClick={() => setActiveTab('sellers')}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'sellers'
-                            ? "bg-primary text-white"
-                            : "bg-white dark:bg-d-bg-light text-text-muted hover:text-primary"
-                            }`}
-                    >
-                        Sellers ({sellers.length})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('registrations')}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'registrations'
-                            ? "bg-primary text-white"
-                            : "bg-white dark:bg-d-bg-light text-text-muted hover:text-primary"
-                            }`}
-                    >
-                        Warranty Registrations ({registrations.length})
-                    </button>
-                    {currentRole === 'master' && (
-                        <button
-                            onClick={() => setActiveTab('admins')}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'admins'
-                                ? "bg-purple-600 text-white"
-                                : "bg-white dark:bg-d-bg-light text-text-muted hover:text-purple-600"
-                                }`}
-                        >
-                            Manage Admins
-                        </button>
-                    )}
-                </div>
-
+        <AdminLayout role={currentRole} email={currentUserEmail} title={TAB_TITLE[activeTab]}>
+            <SEO title={`${TAB_TITLE[activeTab]} - Neoplatron Admin`} noindex />
+            <div>
                 {/* Toolbar (Search & Add) - Only show for sellers/registrations */}
                 {activeTab !== 'admins' && (
                     <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-between">
@@ -526,10 +501,11 @@ export default function AdminDashboard() {
                                                         </td>
                                                         <td className="p-4 text-right align-top">
                                                             <button
-                                                                onClick={() => setSelectedWarranty(reg)}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary/10 text-secondary hover:bg-secondary/20 rounded-lg transition-colors text-sm font-medium"
+                                                                onClick={() => openWarranty(reg.id)}
+                                                                disabled={viewingId !== null}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary/10 text-secondary hover:bg-secondary/20 rounded-lg transition-colors text-sm font-medium disabled:opacity-60"
                                                             >
-                                                                <Eye className="w-4 h-4" />
+                                                                {viewingId === reg.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
                                                                 View
                                                             </button>
                                                         </td>
@@ -562,8 +538,30 @@ export default function AdminDashboard() {
                                     <div className="bg-bg dark:bg-d-bg p-6 rounded-lg border border-border dark:border-d-border sticky top-4">
                                         <h3 className="font-bold text-lg text-text dark:text-d-text mb-4 flex items-center gap-2">
                                             <ShieldCheck className="w-5 h-5 text-purple-600" />
-                                            Invite New Admin
+                                            Add Team Member
                                         </h3>
+                                        {createdLogin && (
+                                            <div className="mb-4 p-3 rounded-lg border border-green-300 bg-green-50 dark:bg-green-900/20 text-sm space-y-1">
+                                                <div className="font-semibold text-green-700 dark:text-green-400">
+                                                    {createdLogin.existing ? "Password reset." : "Login created."} Share these details:
+                                                </div>
+                                                <div className="font-mono break-all">{createdLogin.email}</div>
+                                                <div className="font-mono break-all">{createdLogin.password}</div>
+                                                <div className="flex gap-3 pt-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={copyLogin}
+                                                        className={`font-medium hover:underline ${copied ? "text-green-700 dark:text-green-400" : "text-primary"}`}
+                                                    >
+                                                        {copied ? "Copied!" : "Copy"}
+                                                    </button>
+                                                    <button type="button" onClick={() => setCreatedLogin(null)} className="text-text-muted hover:underline">
+                                                        Dismiss
+                                                    </button>
+                                                </div>
+                                                <div className="text-xs text-text-muted">It will not be shown again. They must set a new password on first login.</div>
+                                            </div>
+                                        )}
                                         <form onSubmit={handleInviteAdmin} className="space-y-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-text dark:text-d-text mb-1">Email Address</label>
@@ -576,12 +574,56 @@ export default function AdminDashboard() {
                                                     placeholder="colleague@example.com"
                                                 />
                                             </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-text dark:text-d-text mb-1">Name (optional)</label>
+                                                <input
+                                                    type="text"
+                                                    value={inviteName}
+                                                    onChange={(e) => setInviteName(e.target.value)}
+                                                    className="w-full px-4 py-2 rounded-lg border border-border dark:border-d-border bg-white dark:bg-d-bg-light focus:ring-1 focus:ring-primary outline-hidden"
+                                                    placeholder="e.g. Priya (telecaller)"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-text dark:text-d-text mb-1">Role</label>
+                                                <select
+                                                    value={inviteRole}
+                                                    onChange={(e) => setInviteRole(e.target.value as 'admin' | 'telecaller')}
+                                                    className="w-full px-4 py-2 rounded-lg border border-border dark:border-d-border bg-white dark:bg-d-bg-light"
+                                                >
+                                                    <option value="telecaller">Telecaller (leads only)</option>
+                                                    <option value="admin">Admin (sellers, warranty, leads)</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-text dark:text-d-text mb-1">Temporary password</label>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={invitePassword}
+                                                        onChange={(e) => setInvitePassword(e.target.value)}
+                                                        required
+                                                        minLength={8}
+                                                        autoComplete="off"
+                                                        className="w-full min-w-0 px-4 py-2 rounded-lg border border-border dark:border-d-border bg-white dark:bg-d-bg-light font-mono focus:ring-1 focus:ring-primary outline-hidden"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setInvitePassword(generateTempPassword())}
+                                                        className="p-2 rounded-lg border border-border dark:border-d-border"
+                                                        title="Generate another"
+                                                    >
+                                                        <RefreshCw className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <p className="mt-1 text-xs text-text-muted">No email is sent. Using an existing member's email resets their password.</p>
+                                            </div>
                                             <button
                                                 type="submit"
                                                 disabled={submitting}
                                                 className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex justify-center items-center gap-2"
                                             >
-                                                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Invite"}
+                                                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Login"}
                                             </button>
                                         </form>
                                     </div>
@@ -589,7 +631,7 @@ export default function AdminDashboard() {
 
                                 {/* List */}
                                 <div className="lg:col-span-2">
-                                    <h3 className="font-bold text-lg text-text dark:text-d-text mb-4">Authorized Admins</h3>
+                                    <h3 className="font-bold text-lg text-text dark:text-d-text mb-4">Authorized Team</h3>
                                     <div className="bg-white dark:bg-d-bg-light rounded-lg border border-border dark:border-d-border overflow-hidden">
                                         <table className="w-full text-left">
                                             <thead className="bg-bg dark:bg-d-bg border-b border-border dark:border-d-border">
@@ -639,7 +681,7 @@ export default function AdminDashboard() {
                         </div>
                     )}
                 </div>
-            </main>
+            </div>
 
             {/* Add Seller Modal */}
             {showAddModal && (
@@ -819,6 +861,6 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             )}
-        </div>
+        </AdminLayout>
     );
 }

@@ -18,7 +18,8 @@ export default function AdminLogin() {
   const location = useLocation();
 
   // Redirect to where they wanted to go, or dashboard
-  const from = location.state?.from?.pathname || "/admin/dashboard";
+  const isTeam = location.pathname.startsWith("/team");
+  const from = location.state?.from?.pathname || (isTeam ? "/team/dashboard" : "/admin/dashboard");
 
   const validatePassword = (pwd: string) => {
     const hasUpper = /[A-Z]/.test(pwd);
@@ -112,7 +113,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-bg dark:bg-d-bg flex items-center justify-center p-4">
-      <SEO title="Admin Login - Neoplatron" noindex />
+      <SEO title={`${isTeam ? "Team" : "Admin"} Login - Neoplatron`} noindex />
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
@@ -120,10 +121,9 @@ export default function AdminLogin() {
             <Shield className="w-8 h-8 text-primary" />
           </div>
           <h1 className="font-title text-3xl font-bold text-text dark:text-d-text mb-2">
-            Admin Portal
+            {isTeam ? "Team Portal" : "Admin Portal"}
           </h1>
           <p className="text-text-muted dark:text-d-text-muted">
-            {mode === "login" && "Sign in to manage sellers and warranties"}
             {mode === "register" && "Create your admin account (Invite required)"}
             {mode === "forgot" && "Reset your password"}
           </p>
@@ -240,17 +240,9 @@ export default function AdminLogin() {
           {/* Footer Links */}
           <div className="mt-6 text-center text-sm space-y-2">
             {mode === "login" && (
-              <>
-                <button onClick={() => setMode("forgot")} className="text-primary hover:underline font-medium">
-                  Forgot Password?
-                </button>
-                <div className="text-text-muted">
-                  Have an invite code?{" "}
-                  <button onClick={() => setMode("register")} className="text-primary hover:underline font-medium">
-                    Sign Up
-                  </button>
-                </div>
-              </>
+              <button onClick={() => setMode("forgot")} className="text-primary hover:underline font-medium">
+                Forgot Password?
+              </button>
             )}
 
             {(mode === "register" || mode === "forgot") && (

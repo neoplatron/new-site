@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     }
 
     if (!session) {
-        return <Navigate to="/admin" state={{ from: location }} replace />;
+        return <Navigate to={location.pathname.startsWith("/team") ? "/team" : "/admin"} state={{ from: location }} replace />;
     }
 
     return children;

@@ -190,19 +190,172 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          role: 'master' | 'admin'
+          role: 'master' | 'admin' | 'telecaller'
           created_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          role: 'master' | 'admin'
+          role: 'master' | 'admin' | 'telecaller'
           created_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          role?: 'master' | 'admin'
+          role?: 'master' | 'admin' | 'telecaller'
+          created_at?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          id: string
+          created_at: string
+          inquiry_type: 'installation' | 'franchise' | 'distribution'
+          email: string | null
+          territory: string | null
+          occupation: string | null
+          prior_experience: string | null
+          investment_budget: string | null
+          source: 'website' | 'sheet_import' | 'phone'
+          full_name: string
+          mobile: string
+          city: string | null
+          state: string | null
+          install_target: string | null
+          vehicle: string | null
+          engine_capacity: string | null
+          preferred_callback_time: string | null
+          question: string | null
+          status: 'new' | 'no_answer' | 'callback' | 'interested' | 'visit_scheduled' | 'installed' | 'not_interested' | 'invalid'
+          interest_reason: string | null
+          assigned_to: string | null
+          next_followup_at: string | null
+          followup_note: string | null
+          visit_date: string | null
+          last_called_at: string | null
+          call_count: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          inquiry_type?: 'installation' | 'franchise' | 'distribution'
+          email?: string | null
+          territory?: string | null
+          occupation?: string | null
+          prior_experience?: string | null
+          investment_budget?: string | null
+          source?: 'website' | 'sheet_import' | 'phone'
+          full_name: string
+          mobile: string
+          city?: string | null
+          state?: string | null
+          install_target?: string | null
+          vehicle?: string | null
+          engine_capacity?: string | null
+          preferred_callback_time?: string | null
+          question?: string | null
+          status?: 'new' | 'no_answer' | 'callback' | 'interested' | 'visit_scheduled' | 'installed' | 'not_interested' | 'invalid'
+          interest_reason?: string | null
+          assigned_to?: string | null
+          next_followup_at?: string | null
+          followup_note?: string | null
+          visit_date?: string | null
+          last_called_at?: string | null
+          call_count?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          inquiry_type?: 'installation' | 'franchise' | 'distribution'
+          email?: string | null
+          territory?: string | null
+          occupation?: string | null
+          prior_experience?: string | null
+          investment_budget?: string | null
+          source?: 'website' | 'sheet_import' | 'phone'
+          full_name?: string
+          mobile?: string
+          city?: string | null
+          state?: string | null
+          install_target?: string | null
+          vehicle?: string | null
+          engine_capacity?: string | null
+          preferred_callback_time?: string | null
+          question?: string | null
+          status?: 'new' | 'no_answer' | 'callback' | 'interested' | 'visit_scheduled' | 'installed' | 'not_interested' | 'invalid'
+          interest_reason?: string | null
+          assigned_to?: string | null
+          next_followup_at?: string | null
+          followup_note?: string | null
+          visit_date?: string | null
+          last_called_at?: string | null
+          call_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lead_calls: {
+        Row: {
+          id: string
+          lead_id: string
+          called_by: string | null
+          called_by_email: string | null
+          created_at: string
+          outcome: 'answered' | 'not_answered' | 'busy' | 'switched_off' | 'wrong_number'
+          summary: string | null
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          called_by?: string | null
+          called_by_email?: string | null
+          created_at?: string
+          outcome: 'answered' | 'not_answered' | 'busy' | 'switched_off' | 'wrong_number'
+          summary?: string | null
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          called_by?: string | null
+          called_by_email?: string | null
+          created_at?: string
+          outcome?: 'answered' | 'not_answered' | 'busy' | 'switched_off' | 'wrong_number'
+          summary?: string | null
+        }
+        Relationships: []
+      }
+      timesheet_entries: {
+        Row: {
+          id: string
+          user_id: string
+          user_email: string | null
+          work_date: string
+          start_time: string
+          end_time: string
+          description: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          user_email?: string | null
+          work_date: string
+          start_time: string
+          end_time: string
+          description: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          user_email?: string | null
+          work_date?: string
+          start_time?: string
+          end_time?: string
+          description?: string
           created_at?: string
         }
         Relationships: []
@@ -210,19 +363,22 @@ export type Database = {
       admin_whitelist: {
         Row: {
           email: string
-          role: 'master' | 'admin'
+          role: 'master' | 'admin' | 'telecaller'
+          name: string | null
           created_at: string
           created_by: string | null
         }
         Insert: {
           email: string
-          role: 'master' | 'admin'
+          role: 'master' | 'admin' | 'telecaller'
+          name?: string | null
           created_at?: string
           created_by?: string | null
         }
         Update: {
           email?: string
-          role?: 'master' | 'admin'
+          role?: 'master' | 'admin' | 'telecaller'
+          name?: string | null
           created_at?: string
           created_by?: string | null
         }

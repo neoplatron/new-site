@@ -95,15 +95,11 @@ body {
   min-height: 100vh;
   background-color: var(--color-bg);
   font-family: var(--font-body);
-  transition: background-color 0.2s ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: var(--color-d-bg);
-  }
-}
-
+/* Dark background only when the site explicitly enables dark mode via the .dark class.
+   (A prefers-color-scheme rule here caused a brown flash on load for dark-mode devices,
+   since the app itself always renders in light mode.) */
 .dark body,
 html.dark body {
   background-color: var(--color-d-bg);

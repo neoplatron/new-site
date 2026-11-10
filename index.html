@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Paint the light background immediately, before CSS/JS load (prevents a dark flash) -->
+    <meta name="color-scheme" content="light" />
+    <style>
+      html, body { background-color: #fbfcfe; }
+    </style>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Poppins:wght@400;500;600;700&display=swap"

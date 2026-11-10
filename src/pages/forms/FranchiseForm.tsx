@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle, Send, XCircle } from "lucide-react";
-import { submitToSheet } from "../../api/sheetFormAPI";
+import { submitPartnerLead } from "../../api/leadsAPI";
 import SubmissionSuccess from "../../components/SubmissionSuccess";
 import SEO from "../../components/SEO";
 
@@ -53,7 +53,7 @@ const FranchiseForm = () => {
     setSubmitStatus(null);
 
     try {
-      await submitToSheet("franchise", formData);
+      await submitPartnerLead("franchise", formData);
       setSubmitStatus("success");
       setFormData({
         fullName: "",

@@ -12,6 +12,9 @@ import ProductOverview from "./pages/ProductOverview";
 import Kits from "./pages/Kits";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import LeadsDashboard from "./pages/admin/LeadsDashboard";
+import StaffDashboard from "./pages/admin/StaffDashboard";
+import Timesheet from "./pages/admin/Timesheet";
 import Partners from "./pages/Partners";
 import Locations from "./pages/Locations";
 import MoneyBackPolicy from "./pages/MoneyBackPolicy";
@@ -29,7 +32,7 @@ import InstallationForm from "./pages/forms/InstallationForm";
 
 function AppContent() {
   const location = useLocation();
-  const isAdminRequest = location.pathname.startsWith("/admin");
+  const isAdminRequest = /^\/(admin|team)(\/|$)/.test(location.pathname);
   // Link-in-bio page renders standalone, without site chrome
   const isBareLayout = isAdminRequest || location.pathname === "/links";
 
@@ -71,14 +74,37 @@ function AppContent() {
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />
+        {["/admin", "/team"].flatMap((base) => [
+          <Route key={`${base}-d`} path={`${base}/dashboard`} element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />,
+          <Route key={`${base}-l`} path={`${base}/leads`} element={<ProtectedRoute><LeadsDashboard /></ProtectedRoute>} />,
+          <Route key={`${base}-t`} path={`${base}/timesheet`} element={<ProtectedRoute><Timesheet /></ProtectedRoute>} />,
+        ])}
         <Route
-          path="/admin/dashboard"
+          path="/admin/sellers"
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <AdminDashboard tab="sellers" />
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/warranty"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard tab="registrations" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/team"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard tab="admins" />
+            </ProtectedRoute>
+          }
+        />
+        {/* Telecallers use /team URLs; same login and pages */}
+        <Route path="/team" element={<AdminLogin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isBareLayout && <Footer />}
