@@ -1,3 +1,4 @@
+import BrandLoader from "../../components/admin/BrandLoader";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Briefcase, ChevronLeft, ChevronRight, Clock, Loader2, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import type { Database } from "../../integrations/supabase/types";
@@ -241,11 +242,7 @@ export default function Timesheet() {
   }, [calls]);
 
   if (roleLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-d-bg">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <BrandLoader fullScreen />;
   }
   if (!role) {
     return (
@@ -402,7 +399,7 @@ export default function Timesheet() {
         )}
 
         {loading ? (
-          <div className="py-16 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          <BrandLoader text="Loading timesheet..." />
         ) : hours.length === 0 ? (
           <div className="py-12 flex flex-col items-center text-center">
             <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3"><Clock className="w-7 h-7" /></div>

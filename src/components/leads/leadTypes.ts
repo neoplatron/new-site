@@ -53,12 +53,37 @@ export const waLink = (mobile: string) => {
   return `https://wa.me/${n}`;
 };
 
+export const cleanMobile = (s: string) => s.replace(/[\s-]+/g, "");
+export const isValidMobile = (s: string) => /^(\+?91)?[6-9]\d{9}$/.test(cleanMobile(s));
+
+// Statuses that end the conversation: no more reminders for these leads.
+export const CLOSED_STATUSES: readonly LeadStatus[] = ["installed", "not_interested", "invalid"];
+export const isClosed = (s: LeadStatus) => CLOSED_STATUSES.includes(s);
+
+// Shared by the public installation form and the staff edit form.
+export const INSTALL_TARGET_OPTIONS = [
+  "Car",
+  "Truck",
+  "Bus",
+  "Generator (DG Set)",
+  "Earthmover",
+  "Marine engines/boats",
+  "Other",
+];
+
+export const ENGINE_CAPACITY_OPTIONS = [
+  "Below 1800cc",
+  "Above 1800cc",
+  "I'm Not Sure of My Vehicle's Engine Capacity",
+];
+
 export type Bucket =
-  | "overdue" | "today" | "visit_today" | "new" | "repeat"
+  | "overdue" | "today" | "visit_today" | "new" | "called" | "followup" | "repeat"
   | "tomorrow" | "visit_tomorrow" | "upcoming";
 
 export const EMPTY_BUCKET_COUNTS: Record<Bucket, number> = {
-  overdue: 0, today: 0, visit_today: 0, new: 0, repeat: 0, tomorrow: 0, visit_tomorrow: 0, upcoming: 0,
+  overdue: 0, today: 0, visit_today: 0, new: 0, called: 0, followup: 0, repeat: 0,
+  tomorrow: 0, visit_tomorrow: 0, upcoming: 0,
 };
 
 const DAY_MS = 86_400_000;
@@ -69,8 +94,11 @@ export function bucketsFor(l: Lead, now: Date, repeatMobiles: Set<string>): Buck
   const today = ymd(now);
   const tomorrow = ymd(addDays(now, 1));
   const eod = addDays(startOfDay(now), 1).getTime();
-  const closed = l.status === "installed" || l.status === "not_interested" || l.status === "invalid";
-  if (closed) return out;
+  // Contacted at least once - includes closed leads.
+  if (l.call_count > 0) out.push("called");
+  if (isClosed(l.status)) return out;
+  // Open leads still waiting on a follow-up call, whenever it is due.
+  if (l.next_followup_at || l.status === "callback") out.push("followup");
   if (l.next_followup_at) {
     const t = new Date(l.next_followup_at).getTime();
     if (t < now.getTime()) out.push("overdue");

@@ -1,3 +1,4 @@
+import BrandLoader from "../components/admin/BrandLoader";
 import { useEffect, useState } from "react";
 import { supabase } from "../integrations/supabase/client";
 import {
@@ -52,6 +53,7 @@ export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [registrations, setRegistrations] = useState<WarrantyListRow[]>([]);
     const [viewingId, setViewingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [admins, setAdmins] = useState<WhitelistedAdmin[]>([]);
     const { role: currentRole, email: currentUserEmail, loading: roleLoading } = useAdminRole();
     // Telecallers only get leads; the team page is master-only.
@@ -189,6 +191,29 @@ export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
         }
     };
 
+    // Master only (also enforced by the database delete policy).
+    const handleDeleteWarranty = async (reg: WarrantyListRow) => {
+        if (!confirm(`Permanently delete the warranty registration for ${reg.customer_name} (${reg.verification_uid})? Any claims filed against it are deleted too. This cannot be undone.`)) return;
+
+        setDeletingId(reg.id);
+        try {
+            // Row-level security blocks a delete silently, so ask for the deleted rows back.
+            const { data, error } = await supabase
+                .from("warranty_registrations")
+                .delete()
+                .eq("id", reg.id)
+                .select("id");
+            if (error) throw error;
+            if (!data?.length) throw new Error("Not permitted to delete this registration");
+            setRegistrations(prev => prev.filter(r => r.id !== reg.id));
+        } catch (error) {
+            console.error("Error deleting warranty:", error);
+            alert("Failed to delete warranty registration: " + (error instanceof Error ? error.message : "unknown error"));
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     const generateSellerCode = () => {
         return Math.floor(10000000 + Math.random() * 90000000).toString();
     };
@@ -323,11 +348,7 @@ export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
     );
 
     if (roleLoading || !allowed) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-d-bg">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-        );
+        return <BrandLoader fullScreen />;
     }
 
     return (
@@ -378,9 +399,7 @@ export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
                     {activeTab === 'sellers' && (
                         <div className="p-0">
                             {loading ? (
-                                <div className="flex justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                                </div>
+                                <BrandLoader text="Loading sellers..." />
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left">
@@ -444,9 +463,7 @@ export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
                     {activeTab === 'registrations' && (
                         <div className="p-0">
                             {loading ? (
-                                <div className="flex justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                                </div>
+                                <BrandLoader text="Loading warranty registrations..." />
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left bg-white dark:bg-d-bg-light">
@@ -499,7 +516,18 @@ export default function AdminDashboard({ tab: activeTab }: { tab: Tab }) {
                                                             </div>
                                                             <div className="text-xs text-text-muted">{reg.garage_name || 'N/A'}</div>
                                                         </td>
-                                                        <td className="p-4 text-right align-top">
+                                                        <td className="p-4 text-right align-top whitespace-nowrap">
+                                                            {currentRole === 'master' && (
+                                                                <button
+                                                                    onClick={() => handleDeleteWarranty(reg)}
+                                                                    disabled={deletingId !== null}
+                                                                    className="inline-flex items-center p-2 mr-2 align-middle hover:bg-red-50 dark:hover:bg-red-900/10 text-text-muted hover:text-red-500 rounded-lg transition-colors disabled:opacity-60"
+                                                                    title="Delete registration"
+                                                                    aria-label="Delete registration"
+                                                                >
+                                                                    {deletingId === reg.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                                </button>
+                                                            )}
                                                             <button
                                                                 onClick={() => openWarranty(reg.id)}
                                                                 disabled={viewingId !== null}

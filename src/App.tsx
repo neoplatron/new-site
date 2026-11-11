@@ -11,6 +11,7 @@ import ContactUs from "./pages/ContactUs";
 import ProductOverview from "./pages/ProductOverview";
 import Kits from "./pages/Kits";
 import AdminLogin from "./pages/AdminLogin";
+import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import LeadsDashboard from "./pages/admin/LeadsDashboard";
 import StaffDashboard from "./pages/admin/StaffDashboard";
@@ -75,6 +76,8 @@ function AppContent() {
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />
         {["/admin", "/team"].flatMap((base) => [
+          // Opened from the "Forgot Password?" email, so it must work without being signed in first.
+          <Route key={`${base}-r`} path={`${base}/reset-password`} element={<ResetPassword />} />,
           <Route key={`${base}-d`} path={`${base}/dashboard`} element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />,
           <Route key={`${base}-l`} path={`${base}/leads`} element={<ProtectedRoute><LeadsDashboard /></ProtectedRoute>} />,
           <Route key={`${base}-t`} path={`${base}/timesheet`} element={<ProtectedRoute><Timesheet /></ProtectedRoute>} />,

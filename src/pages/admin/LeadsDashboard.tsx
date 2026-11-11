@@ -1,6 +1,7 @@
+import BrandLoader from "../../components/admin/BrandLoader";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BellRing, Clock, Download, Loader2, Phone, Plus, RefreshCw, Search, SlidersHorizontal, Upload, X } from "lucide-react";
+import { BellRing, Clock, Download, Phone, Plus, RefreshCw, Search, SlidersHorizontal, Upload, X } from "lucide-react";
 import WhatsAppIcon from "../../components/leads/WhatsAppIcon";
 import AdminLayout from "../../components/admin/AdminLayout";
 import SEO from "../../components/SEO";
@@ -10,6 +11,7 @@ import { INDIAN_STATES } from "../../data/indianStates";
 import { downloadCsv } from "../../utils/csv";
 import LeadDrawer from "../../components/leads/LeadDrawer";
 import { BUCKET_TITLE } from "../../components/leads/RemindersPanel";
+import BulkActionBar from "../../components/leads/BulkActionBar";
 import AddLeadModal from "../../components/leads/AddLeadModal";
 import ImportCsvModal from "../../components/leads/ImportCsvModal";
 import {
@@ -32,7 +34,19 @@ const locationOf = (city?: string | null, state?: string | null) =>
 
 const isPartner = (l: Lead) => l.inquiry_type === "franchise" || l.inquiry_type === "distribution";
 
-const fsel =`${sel} w-full min-w-0 md:w-auto`;
+const fsel = `${sel} w-full min-w-0`;
+
+// Soft avatar tints, picked from the name so a lead keeps the same colour.
+const AVATAR_TINTS = [
+  "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+  "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+  "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+  "bg-purple-500/15 text-purple-600 dark:text-purple-400",
+  "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+  "bg-teal-500/15 text-teal-600 dark:text-teal-400",
+  "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400",
+];
+const avatarCls = (name: string) => AVATAR_TINTS[[...name].reduce((n, ch) => n + ch.charCodeAt(0), 0) % AVATAR_TINTS.length];
 
 export default function LeadsDashboard() {
   const { role, email, userId, loading: roleLoading } = useAdminRole();
@@ -42,7 +56,9 @@ export default function LeadsDashboard() {
   const [mobileLimit, setMobileLimit] = useState(MOBILE_PAGE);
   // The desktop table does the same: drawing ~4,000 rows on every filter change made the page lag.
   const [desktopLimit, setDesktopLimit] = useState(DESKTOP_PAGE);
-  useEffect(() => { setMobileLimit(MOBILE_PAGE); setDesktopLimit(DESKTOP_PAGE); }, [params]);
+  // Leads ticked for a bulk action (master / admin only). Cleared whenever the filters change.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  useEffect(() => { setMobileLimit(MOBILE_PAGE); setDesktopLimit(DESKTOP_PAGE); setSelected(new Set()); }, [params]);
   const { leads, loading, load, now, bucketMap } = useLeads();
   const [openId, setOpenId] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
@@ -130,10 +146,10 @@ export default function LeadsDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leads, params]);
 
-  const exportCsv = () => {
+  const exportCsv = (rows: Lead[]) => {
     downloadCsv(`neoplatron-leads-${new Date().toISOString().slice(0, 10)}.csv`, [
       ["Enquired", "Name", "Mobile", "City", "State", "Install on", "Vehicle", "Engine", "Status", "Calls", "Last called", "Next follow-up", "Visit date", "Remark"],
-      ...filtered.map((l) => [
+      ...rows.map((l) => [
         fmtDateTime(l.created_at), l.full_name, l.mobile, l.city, l.state, l.install_target, l.vehicle, l.engine_capacity,
         STATUS_META[l.status].label, l.call_count, fmtDateTime(l.last_called_at), fmtDateTime(l.next_followup_at), l.visit_date, l.interest_reason,
       ]),
@@ -141,11 +157,7 @@ export default function LeadsDashboard() {
   };
 
   if (roleLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-d-bg">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <BrandLoader fullScreen />;
   }
   if (!role) {
     return (
@@ -156,6 +168,20 @@ export default function LeadsDashboard() {
   }
 
   const openLead = leads.find((l) => l.id === openId) ?? null;
+  const canBulk = role === "master" || role === "admin";
+  const selectedLeads = filtered.filter((l) => selected.has(l.id));
+  const allSelected = filtered.length > 0 && selectedLeads.length === filtered.length;
+  const toggleOne = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  // The header box covers every lead matching the filters, not only the rows drawn so far.
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(filtered.map((l) => l.id)));
+  const tick = "w-4 h-4 accent-primary cursor-pointer";
+  // Outline a filter that is currently narrowing the list.
+  const on = (k: string) => (get(k) ? "ring-1 ring-primary/60" : "");
   const activeFilterCount = ["state", "status", "target", "cc", "from", "to", "follow", "sort"].filter((k) => get(k)).length;
   const hasFilters =["sort", "type","q","state", "status", "target", "cc", "from", "to", "mine", "follow", "bucket"].some((k) => get(k));
 
@@ -171,7 +197,7 @@ export default function LeadsDashboard() {
           </button>
           {/* Telecallers can view and call leads but not bulk-export them. */}
           {role !== "telecaller" && (
-            <button onClick={exportCsv} aria-label="Export" className={ghostBtn}>
+            <button onClick={() => exportCsv(filtered)} aria-label="Export" className={ghostBtn}>
               <Download className="w-4 h-4" /><span className="hidden md:inline">Export</span>
             </button>
           )}
@@ -187,7 +213,8 @@ export default function LeadsDashboard() {
       }
     >
       <SEO title="Leads - Neoplatron" noindex />
-      <div className="space-y-4 md:space-y-6">
+      {/* Extra room at the bottom so the bulk bar never covers the last lead */}
+      <div className={`space-y-4 md:space-y-6 ${selectedLeads.length ? "pb-28 md:pb-20" : ""}`}>
         {/* Set when arriving from a dashboard reminder card */}
         {get("bucket") && BUCKET_TITLE[get("bucket") as Bucket] && (
           <div className="flex items-center gap-2 text-sm">
@@ -202,113 +229,136 @@ export default function LeadsDashboard() {
           </div>
         )}
 
-        {/* Enquiry type: installation / franchise / distribution */}
-        <select className={`${sel} w-full md:hidden font-medium`} value={get("type")} onChange={(e) => setP("type", e.target.value)} aria-label="Enquiry type">
-          <option value="">All enquiries ({leads.length.toLocaleString("en-IN")})</option>
-          {INQUIRY_TYPES.map((t) => (
-            <option key={t} value={t}>{INQUIRY_META[t].label} ({typeCounts[t].toLocaleString("en-IN")})</option>
-          ))}
-        </select>
-        <div className="hidden md:flex gap-1 p-1 rounded-xl bg-border/30 w-fit" role="tablist" aria-label="Enquiry type">
-          {(["", ...INQUIRY_TYPES] as const).map((t) => {
-            const active = get("type") === t;
-            return (
+        {/* One toolbar card: enquiry type + search, filters, then quick state chips */}
+        <section className="rounded-2xl bg-bg-light dark:bg-d-bg-light border border-border dark:border-d-border shadow-sm">
+          <div className="flex flex-col xl:flex-row xl:items-center gap-3 p-3 md:p-4">
+            {/* Enquiry type: installation / franchise / distribution */}
+            <select className={`${sel} w-full md:hidden font-medium`} value={get("type")} onChange={(e) => setP("type", e.target.value)} aria-label="Enquiry type">
+              <option value="">All enquiries ({leads.length.toLocaleString("en-IN")})</option>
+              {INQUIRY_TYPES.map((t) => (
+                <option key={t} value={t}>{INQUIRY_META[t].label} ({typeCounts[t].toLocaleString("en-IN")})</option>
+              ))}
+            </select>
+            <div className="hidden md:flex gap-1 p-1 rounded-xl bg-border/30 w-fit max-w-full overflow-x-auto" role="tablist" aria-label="Enquiry type">
+              {(["", ...INQUIRY_TYPES] as const).map((t) => {
+                const active = get("type") === t;
+                return (
+                  <button
+                    key={t || "all"}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setP("type", t)}
+                    className={`shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${active ? "bg-bg-light dark:bg-d-bg-light text-primary shadow-sm" : "text-text-muted dark:text-d-text-muted hover:text-text dark:hover:text-d-text"}`}
+                  >
+                    {t ? INQUIRY_META[t].label : "All"}
+                    <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-semibold tabular-nums ${active ? "bg-primary/10" : "bg-border/40"}`}>{(t ? typeCounts[t] : leads.length).toLocaleString("en-IN")}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-2 xl:ml-auto xl:w-80 2xl:w-96">
+              <div className="relative flex-1 min-w-0">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input className={`${sel} w-full pl-9 pr-9`} placeholder="Search name, mobile, vehicle, city" value={get("q")} onChange={(e) => setP("q", e.target.value)} />
+                {get("q") && (
+                  <button onClick={() => setP("q", "")} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-text-muted dark:text-d-text-muted hover:bg-border/40 transition-colors" aria-label="Clear search">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
               <button
-                key={t || "all"}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setP("type", t)}
-                className={`flex-1 md:flex-none shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition ${active ? "bg-bg-light dark:bg-d-bg-light text-primary shadow-sm" : "text-text-muted dark:text-d-text-muted hover:text-text dark:hover:text-d-text"}`}
+                onClick={() => setShowFilters((v) => !v)}
+                aria-expanded={showFilters}
+                className={`md:hidden shrink-0 inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm ${showFilters || activeFilterCount ? "border-primary text-primary" : "border-border dark:border-d-border"}`}
               >
-                {t ? INQUIRY_META[t].label : "All"}
-                <span className="text-[11px] tabular-nums opacity-70">{(t ? typeCounts[t] : leads.length).toLocaleString("en-IN")}</span>
+                <SlidersHorizontal className="w-4 h-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] flex items-center justify-center">{activeFilterCount}</span>
+                )}
               </button>
-            );
-          })}
-        </div>
-
-        <section className="md:rounded-2xl md:bg-bg-light md:dark:bg-d-bg-light md:border border-border dark:border-d-border md:p-4 md:shadow-sm">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-text-muted dark:text-d-text-muted mb-2.5">Leads by state <span className="hidden md:inline">(click to filter)</span></div>
-          <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap md:mx-0 md:px-0 md:pb-0">
-            {byState.map(([s, n]) => {
-              const active = s === "Unknown" ? get("state") === "__none" : get("state") === s;
-              return (
-                <button
-                  key={s}
-                  onClick={() => setP("state", active ? "" : s === "Unknown" ? "__none" : s)}
-                  className={`shrink-0 whitespace-nowrap inline-flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full text-xs font-medium border transition ${active ? "bg-primary text-white border-primary shadow-sm shadow-primary/30" : "border-border dark:border-d-border bg-bg-light dark:bg-d-bg-light md:bg-bg md:dark:bg-d-bg hover:border-primary/50 hover:text-primary"}`}
-                >
-                  {s}
-                  <span className={`min-w-6 px-1.5 py-0.5 rounded-full text-[11px] font-semibold tabular-nums ${active ? "bg-white/20" : "bg-border/40 text-text-muted dark:text-d-text-muted"}`}>{n.toLocaleString("en-IN")}</span>
-                </button>
-              );
-            })}
+            </div>
           </div>
-        </section>
 
-        <section className="flex flex-wrap gap-2 items-center md:rounded-2xl md:bg-bg-light md:dark:bg-d-bg-light md:border border-border dark:border-d-border md:p-3 md:shadow-sm">
-          <div className="relative flex-1 min-w-0 md:min-w-[260px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input className={`${sel} w-full pl-9`} placeholder="Search name, mobile, vehicle, city" value={get("q")} onChange={(e) => setP("q", e.target.value)} />
-          </div>
-          <button
-            onClick={() => setShowFilters((v) => !v)}
-            aria-expanded={showFilters}
-            className={`md:hidden inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border text-sm font-medium shadow-sm ${showFilters || activeFilterCount ? "border-primary text-primary" : "border-border dark:border-d-border"}`}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="min-w-5 h-5 px-1 rounded-full bg-primary text-white text-[11px] flex items-center justify-center">{activeFilterCount}</span>
-            )}
-          </button>
-          {/* Collapsible on phones, always inline on desktop */}
-          <div className={`${showFilters ? "grid grid-cols-2 gap-2 w-full" : "hidden"} md:contents`}>
-            <select className={`${fsel} md:max-w-[220px]`} value={get("state")} onChange={(e) => setP("state", e.target.value)}>
+          {/* Collapsible on phones, always shown on desktop */}
+          <div className={`${showFilters ? "grid" : "hidden"} md:grid grid-cols-2 lg:grid-cols-4 gap-2 px-3 md:px-4 pb-3 md:pb-4`}>
+            <select className={`${fsel} ${on("state")}`} value={get("state")} onChange={(e) => setP("state", e.target.value)} aria-label="State">
               <option value="">All states</option>
               {states.map((s) => <option key={s} value={s}>{s}</option>)}
               <option value="__none">No state given</option>
               <option value="__other">Other / unrecognised</option>
             </select>
-            <select className={fsel} value={get("status")} onChange={(e) => setP("status", e.target.value)}>
+            <select className={`${fsel} ${on("status")}`} value={get("status")} onChange={(e) => setP("status", e.target.value)} aria-label="Status">
               <option value="">All statuses</option>
               {STATUSES.map((s) => <option key={s} value={s}>{STATUS_META[s].label}</option>)}
             </select>
-            <select className={fsel} value={get("target")} onChange={(e) => setP("target", e.target.value)}>
+            <select className={`${fsel} ${on("target")}`} value={get("target")} onChange={(e) => setP("target", e.target.value)} aria-label="Vehicle type">
               <option value="">Any vehicle type</option>
               {targets.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-            <select className={fsel} value={get("cc")} onChange={(e) => setP("cc", e.target.value)}>
+            <select className={`${fsel} ${on("cc")}`} value={get("cc")} onChange={(e) => setP("cc", e.target.value)} aria-label="Engine size">
               <option value="">Any engine size</option>
               <option value="Below 1800cc">Below 1800cc</option>
               <option value="Above 1800cc">Above 1800cc</option>
               <option value="I'm Not Sure of My Vehicle's Engine Capacity">Not sure</option>
             </select>
-            <select className={fsel} value={get("follow")} onChange={(e) => setP("follow", e.target.value)}>
+            <select className={`${fsel} ${on("follow")}`} value={get("follow")} onChange={(e) => setP("follow", e.target.value)} aria-label="Follow-up">
               <option value="">Any follow-up</option>
               <option value="overdue">Overdue</option>
               <option value="today">Today</option>
               <option value="week">Next 7 days</option>
             </select>
-            <select className={fsel} value={get("sort")} onChange={(e) => setP("sort", e.target.value)} aria-label="Sort order">
+            <select className={`${fsel} ${on("sort")}`} value={get("sort")} onChange={(e) => setP("sort", e.target.value)} aria-label="Sort order">
               <option value="">Sort: Follow-ups first</option>
               <option value="latest">Sort: Latest first (not called yet)</option>
               <option value="oldest">Sort: Oldest first</option>
             </select>
-            <input type="date" className={fsel} value={get("from")} onChange={(e) => setP("from", e.target.value)} aria-label="From date" />
-            <input type="date" className={fsel} value={get("to")} onChange={(e) => setP("to", e.target.value)} aria-label="To date" />
+            {/* Date inputs get a visible label; a bare "dd-mm-yyyy" box says nothing about what it filters */}
+            {([["from", "Enquired from"], ["to", "Enquired to"]] as const).map(([k, label]) => (
+              <label key={k} className={`${fsel} ${on(k)} flex items-center gap-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20`}>
+                <span className="shrink-0 text-xs text-text-muted dark:text-d-text-muted">
+                  <span className="hidden sm:inline">{label}</span>
+                  <span className="sm:hidden capitalize">{k}</span>
+                </span>
+                <input type="date" className="flex-1 min-w-0 bg-transparent text-sm focus:outline-none" value={get(k)} onChange={(e) => setP(k, e.target.value)} aria-label={`${label} date`} />
+              </label>
+            ))}
           </div>
-          {hasFilters && (
-            <button onClick={() => setParams({}, { replace: true })} className="inline-flex items-center gap-1 h-10 px-3 rounded-lg text-sm font-medium text-text-muted dark:text-d-text-muted hover:text-red-500 hover:bg-red-500/10 transition"><X className="w-4 h-4" />Reset</button>
-          )}
+
+          <div className="flex items-center gap-3 px-3 md:px-4 py-3 border-t border-border dark:border-d-border bg-bg/60 dark:bg-d-bg/40 rounded-b-2xl">
+            <span className="hidden md:inline shrink-0 text-[11px] font-semibold uppercase tracking-wider text-text-muted dark:text-d-text-muted">Top states</span>
+            <div className="flex gap-2 min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap">
+              {byState.map(([s, n]) => {
+                const active = s === "Unknown" ? get("state") === "__none" : get("state") === s;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => setP("state", active ? "" : s === "Unknown" ? "__none" : s)}
+                    className={`shrink-0 whitespace-nowrap inline-flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full text-xs font-medium border transition ${active ? "bg-primary text-white border-primary shadow-sm shadow-primary/30" : "border-border dark:border-d-border bg-bg-light dark:bg-d-bg-light hover:border-primary/50 hover:text-primary"}`}
+                  >
+                    {s}
+                    <span className={`min-w-6 px-1.5 py-0.5 rounded-full text-[11px] font-semibold tabular-nums ${active ? "bg-white/20" : "bg-border/40 text-text-muted dark:text-d-text-muted"}`}>{n.toLocaleString("en-IN")}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
-        <div className="text-xs md:text-sm text-text-muted dark:text-d-text-muted">
-          Showing <b className="text-text dark:text-d-text tabular-nums">{filtered.length.toLocaleString("en-IN")}</b> of <span className="tabular-nums">{leads.length.toLocaleString("en-IN")}</span> leads
+        <div className="flex items-center justify-between gap-3 min-h-8">
+          <div className="text-xs md:text-sm text-text-muted dark:text-d-text-muted">
+            Showing <b className="text-text dark:text-d-text tabular-nums">{filtered.length.toLocaleString("en-IN")}</b> of <span className="tabular-nums">{leads.length.toLocaleString("en-IN")}</span> leads
+          </div>
+          {hasFilters && (
+            <button onClick={() => setParams({}, { replace: true })} className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs md:text-sm font-medium text-text-muted dark:text-d-text-muted hover:text-red-500 hover:bg-red-500/10 transition">
+              <X className="w-4 h-4" />Reset filters
+            </button>
+          )}
         </div>
 
         {loading && leads.length === 0 ? (
-          <div className="py-16 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          <BrandLoader text="Loading leads..." />
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-text-muted dark:text-d-text-muted">No leads match these filters.</div>
         ) : (
@@ -318,8 +368,13 @@ export default function LeadsDashboard() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-border/20 text-[11px] uppercase tracking-wider text-text-muted dark:text-d-text-muted">
                   <tr>
+                    {canBulk && (
+                      <th className="pl-3 py-3 w-8">
+                        <input type="checkbox" className={tick} checked={allSelected} onChange={toggleAll} aria-label={`Select all ${filtered.length} leads`} title="Select all leads matching the filters" />
+                      </th>
+                    )}
                     {["Name", "Location", "Vehicle", "Status", "Last call", "Next follow-up"].map((h) => (
-                      <th key={h} className={`px-3 py-3 font-semibold whitespace-nowrap ${h === "Last call" ? "hidden xl:table-cell" : ""}`}>{h}</th>
+                      <th key={h} className={`px-3 py-3.5 font-semibold whitespace-nowrap ${h === "Last call" ? "hidden xl:table-cell" : ""}`}>{h}</th>
                     ))}
                     <th className="px-3 py-3" aria-label="Actions" />
                   </tr>
@@ -328,10 +383,15 @@ export default function LeadsDashboard() {
                   {filtered.slice(0, desktopLimit).map((l) => {
                     const overdue = bucketMap.get(l.id)?.includes("overdue");
                     return (
-                      <tr key={l.id} onClick={() => setOpenId(l.id)} className="group border-t border-border/70 dark:border-d-border/70 hover:bg-primary/5 cursor-pointer transition-colors">
+                      <tr key={l.id} onClick={() => setOpenId(l.id)} className={`group border-t border-border/70 dark:border-d-border/70 hover:bg-primary/5 cursor-pointer transition-colors ${selected.has(l.id) ? "bg-primary/5" : ""}`}>
+                        {canBulk && (
+                          <td className="pl-3 py-3 w-8" onClick={(e) => e.stopPropagation()}>
+                            <input type="checkbox" className={tick} checked={selected.has(l.id)} onChange={() => toggleOne(l.id)} aria-label={`Select ${l.full_name}`} />
+                          </td>
+                        )}
                         <td className="px-3 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 shrink-0 rounded-full bg-primary/10 text-primary font-semibold text-xs flex items-center justify-center">{initialsOf(l.full_name)}</div>
+                            <div className={`w-9 h-9 shrink-0 rounded-full font-semibold text-xs flex items-center justify-center ${avatarCls(l.full_name)}`}>{initialsOf(l.full_name)}</div>
                             <div className="min-w-0">
                               <div className="font-semibold group-hover:text-primary transition-colors">{l.full_name}</div>
                               <div className="text-xs text-text-muted dark:text-d-text-muted tabular-nums whitespace-nowrap">{l.mobile} · {fmtDate(l.created_at)}</div>
@@ -361,7 +421,8 @@ export default function LeadsDashboard() {
                         </td>
                         <td className={`px-3 py-3 ${overdue ? "text-red-600 font-semibold" : ""}`}>
                           <div className="whitespace-nowrap tabular-nums">{l.next_followup_at ? fmtDateTime(l.next_followup_at) : <span className="text-text-muted dark:text-d-text-muted">-</span>}</div>
-                          {l.visit_date && <div className="text-xs">Visit {fmtYmd(l.visit_date)}</div>}
+                          {overdue && <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded-md bg-red-500/10 text-[10px] font-bold uppercase tracking-wide">Overdue</span>}
+                          {l.visit_date &&<div className="text-xs">Visit {fmtYmd(l.visit_date)}</div>}
                           {l.followup_note && <div title={l.followup_note} className="text-xs font-normal text-text-muted dark:text-d-text-muted max-w-[160px] truncate">{l.followup_note}</div>}
                         </td>
                         {/* Pinned to the right edge so Call / WhatsApp stay reachable on narrow screens */}
@@ -383,12 +444,23 @@ export default function LeadsDashboard() {
 
             {/* Mobile cards */}
             <div className="md:hidden space-y-3">
+              {canBulk && (
+                <label className="flex items-center gap-2 px-1 text-sm font-medium">
+                  <input type="checkbox" className={tick} checked={allSelected} onChange={toggleAll} />
+                  Select all {filtered.length.toLocaleString("en-IN")}
+                </label>
+              )}
               {filtered.slice(0, mobileLimit).map((l) => {
                 const overdue = bucketMap.get(l.id)?.includes("overdue");
                 return (
                   <div key={l.id} onClick={() => setOpenId(l.id)} className="rounded-2xl border border-border dark:border-d-border bg-bg-light dark:bg-d-bg-light p-3.5 shadow-sm active:scale-[0.99] transition space-y-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 shrink-0 rounded-full bg-primary/10 text-primary font-semibold text-sm flex items-center justify-center">{initialsOf(l.full_name)}</div>
+                      {canBulk && (
+                        <span className="self-center -m-2 p-2" onClick={(e) => e.stopPropagation()}>
+                          <input type="checkbox" className={`${tick} block`} checked={selected.has(l.id)} onChange={() => toggleOne(l.id)} aria-label={`Select ${l.full_name}`} />
+                        </span>
+                      )}
+                      <div className={`w-10 h-10 shrink-0 rounded-full font-semibold text-sm flex items-center justify-center ${avatarCls(l.full_name)}`}>{initialsOf(l.full_name)}</div>
                       <div className="min-w-0 flex-1">
                         <div className="font-semibold truncate">{l.full_name}</div>
                         <div className="text-xs text-text-muted dark:text-d-text-muted truncate">{locationOf(l.city, l.state) || "Location not given"}</div>
@@ -443,6 +515,9 @@ export default function LeadsDashboard() {
           onSaved={load}
           canDelete={role === "master" || role === "admin"}
         />
+      )}
+      {canBulk && selectedLeads.length > 0 && (
+        <BulkActionBar selected={selectedLeads} onExport={exportCsv} onClear={() => setSelected(new Set())} onDone={load} />
       )}
       {showAdd && <AddLeadModal userId={userId} onClose={() => setShowAdd(false)} onDone={load} />}
       {showImport && <ImportCsvModal userId={userId} onClose={() => setShowImport(false)} onDone={load} />}

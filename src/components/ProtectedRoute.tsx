@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
-import { Loader2 } from "lucide-react";
+import BrandLoader from "./admin/BrandLoader";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
@@ -25,11 +25,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     }, []);
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-bg dark:bg-d-bg">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-        );
+        return <BrandLoader fullScreen text="Checking your login..." />;
     }
 
     if (!session) {

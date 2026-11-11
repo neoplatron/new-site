@@ -4,22 +4,7 @@ import { submitInstallationLead } from "../../api/leadsAPI";
 import { INDIAN_STATES } from "../../data/indianStates";
 import SubmissionSuccess from "../../components/SubmissionSuccess";
 import SEO from "../../components/SEO";
-
-const INSTALL_TARGET_OPTIONS = [
-  "Car",
-  "Truck",
-  "Bus",
-  "Generator (DG Set)",
-  "Earthmover",
-  "Marine engines/boats",
-  "Other",
-];
-
-const ENGINE_CAPACITY_OPTIONS = [
-  "Below 1800cc",
-  "Above 1800cc",
-  "I'm Not Sure of My Vehicle's Engine Capacity",
-];
+import { ENGINE_CAPACITY_OPTIONS, INSTALL_TARGET_OPTIONS } from "../../components/leads/leadTypes";
 
 const CALLBACK_TIME_OPTIONS = ["10 AM – 12 PM", "12 PM – 3 PM", "3 PM – 5 PM"];
 

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Phone, Trash2, X } from "lucide-react";
+import { Loader2, Pencil, Phone, Trash2, X } from "lucide-react";
 import WhatsAppIcon from "./WhatsAppIcon";
+import LeadEditForm from "./LeadEditForm";
 import { supabase } from "../../integrations/supabase/client";
-import { INDIAN_STATES } from "../../data/indianStates";
 import {
-  INQUIRY_META, OUTCOMES, OUTCOME_LABEL, STATUSES, STATUS_META, addDays, fmtDateTime, fmtYmd, startOfDay, waLink, ymd,
+  INQUIRY_META, OUTCOMES, OUTCOME_LABEL, STATUSES, STATUS_META, addDays, fmtDateTime, fmtYmd, isClosed, startOfDay, waLink, ymd,
   type CallOutcome, type Lead, type LeadCall, type LeadStatus,
 } from "./leadTypes";
 
@@ -35,9 +35,9 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
   const [next, setNext] = useState<NextAction>("none");
   const [callbackAt, setCallbackAt] = useState(toLocalInput(at(addDays(new Date(), 1), 10)));
   const [visitDate, setVisitDate] = useState(lead.visit_date ?? ymd(addDays(new Date(), 2)));
-  const [city, setCity] = useState(lead.city ?? "");
-  const [state, setState] = useState(lead.state ?? "");
-  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
+  // Which of the two save buttons is busy: logging a call, or updating without one.
+  const [saving, setSaving] = useState<"call" | "update" | null>(null);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
@@ -113,43 +113,48 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
     }
   };
 
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  // logCall = false corrects status / remark / follow-up without adding to the call history or call count.
+  const save = async (logCall: boolean) => {
+    if (next === "callback" && !callbackAt) return setError("Pick a call back date and time.");
+    if (next === "visit" && !visitDate) return setError("Pick a visit date.");
+    setSaving(logCall ? "call" : "update");
     setError("");
     try {
       const f = computeFollowup();
       const finalStatus: LeadStatus = next === "visit" ? "visit_scheduled" : status;
-      const { error: callErr } = await supabase.from("lead_calls").insert({
-        lead_id: lead.id,
-        called_by: userId,
-        called_by_email: userEmail,
-        outcome,
-        summary: summary.trim() || null,
-      });
-      if (callErr) throw callErr;
-      const { error: upErr } = await supabase
+      if (logCall) {
+        const { error: callErr } = await supabase.from("lead_calls").insert({
+          lead_id: lead.id,
+          called_by: userId,
+          called_by_email: userEmail,
+          outcome,
+          summary: summary.trim() || null,
+        });
+        if (callErr) throw callErr;
+      }
+      // Without a call, "No follow-up" means "leave the reminder as it is" - unless the lead is being closed.
+      const keepFollowup = !logCall && next === "none" && !isClosed(finalStatus);
+      const { data, error: upErr } = await supabase
         .from("leads")
         .update({
           status: finalStatus,
           interest_reason: reason.trim() || null,
-          next_followup_at: f.at,
-          followup_note: f.note,
-          visit_date: f.visit,
-          city: city.trim() || null,
-          state: state || null,
+          ...(keepFollowup ? {} : { next_followup_at: f.at, followup_note: f.note, visit_date: f.visit }),
         })
-        .eq("id", lead.id);
+        .eq("id", lead.id)
+        .select("id");
       if (upErr) throw upErr;
+      // Row-level security blocks silently: no error, but nothing changed.
+      if (!data?.length) throw new Error("Your account is not allowed to update this lead.");
       setSummary("");
       setNext("none");
-      await loadCalls();
+      if (logCall) await loadCalls();
       onSaved();
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   };
 
@@ -163,9 +168,11 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
     { v: "visit", l: "Will visit on..." },
   ];
 
+  const location = [lead.city, lead.state].filter(Boolean).join(", ") || null;
   const details: [string, string | null][] = (lead.inquiry_type ?? "installation") === "installation"
     ? [
         ["Enquired", fmtDateTime(lead.created_at)],
+        ["Location", location],
         ["Install on", lead.install_target],
         ["Vehicle", lead.vehicle],
         ["Engine", lead.engine_capacity],
@@ -175,6 +182,7 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
     : [
         ["Enquired", fmtDateTime(lead.created_at)],
         ["Enquiry type", INQUIRY_META[lead.inquiry_type].label],
+        ["Location", location],
         ["Email", lead.email],
         ["Territory wanted", lead.territory],
         ["Occupation", lead.occupation],
@@ -194,6 +202,15 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
             <p className="text-sm text-text-muted dark:text-d-text-muted">{lead.mobile}</p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setEditing((v) => !v)}
+              aria-label="Edit details"
+              title="Edit details"
+              aria-pressed={editing}
+              className={`p-1.5 rounded hover:bg-primary/10 hover:text-primary ${editing ? "bg-primary/10 text-primary" : "text-text-muted dark:text-d-text-muted"}`}
+            >
+              <Pencil className="w-5 h-5" />
+            </button>
             {canDelete && (
               <button
                 onClick={deleteLead}
@@ -228,35 +245,26 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
           </div>
         )}
 
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-          {details.map(([k, v]) => (
-            <div key={k}>
-              <dt className={label}>{k}</dt>
-              <dd className="text-text dark:text-d-text">{v || "-"}</dd>
-            </div>
-          ))}
-          {lead.question && (
-            <div className="col-span-2">
-              <dt className={label}>Customer asked</dt>
-              <dd className="text-text dark:text-d-text">{lead.question}</dd>
-            </div>
-          )}
-          <div>
-            <label className={label}>City</label>
-            <input className={input} value={city} onChange={(e) => setCity(e.target.value)} />
-          </div>
-          <div>
-            <label className={label}>State</label>
-            <select className={input} value={state} onChange={(e) => setState(e.target.value)}>
-              <option value="">- not set -</option>
-              {INDIAN_STATES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-        </dl>
+        {editing ? (
+          <LeadEditForm lead={lead} onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); onSaved(); }} />
+        ) : (
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            {details.map(([k, v]) => (
+              <div key={k}>
+                <dt className={label}>{k}</dt>
+                <dd className="text-text dark:text-d-text">{v || "-"}</dd>
+              </div>
+            ))}
+            {lead.question && (
+              <div className="col-span-2">
+                <dt className={label}>Customer asked</dt>
+                <dd className="text-text dark:text-d-text">{lead.question}</dd>
+              </div>
+            )}
+          </dl>
+        )}
 
-        <form onSubmit={save} className="space-y-4 rounded-xl border-2 border-border dark:border-d-border p-4">
+        <form onSubmit={(e) => { e.preventDefault(); save(true); }} className="space-y-4 rounded-xl border-2 border-border dark:border-d-border p-4">
           <h3 className="font-bold text-text dark:text-d-text">Log this call</h3>
           <div>
             <span className={label}>What happened?</span>
@@ -325,10 +333,19 @@ export default function LeadDrawer({ lead, userId, userEmail, onClose, onSaved, 
           </div>
           {error && <p className="text-sm text-error">{error}</p>}
           <button
-            disabled={saving}
+            disabled={!!saving}
             className="w-full py-2.5 rounded-lg bg-linear-to-r from-primary to-secondary text-white font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
-            {saving && <Loader2 className="w-4 h-4 animate-spin" />}Save call
+            {saving === "call" && <Loader2 className="w-4 h-4 animate-spin" />}Save call
+          </button>
+          <button
+            type="button"
+            onClick={() => save(false)}
+            disabled={!!saving}
+            title="Saves the status, remark and follow-up only. Nothing is added to the call history."
+            className="w-full py-2 rounded-lg border-2 border-border dark:border-d-border text-sm font-semibold text-text dark:text-d-text hover:border-primary/50 hover:text-primary disabled:opacity-50 inline-flex items-center justify-center gap-2"
+          >
+            {saving === "update" && <Loader2 className="w-4 h-4 animate-spin" />}Update without logging a call
           </button>
         </form>
 

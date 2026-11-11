@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { INDIAN_STATES } from "../../data/indianStates";
+import { cleanMobile, isValidMobile } from "./leadTypes";
 
 const inp =
   "w-full px-3 py-2 rounded-lg border-2 border-border dark:border-d-border bg-bg dark:bg-d-bg text-text dark:text-d-text text-sm focus:outline-none focus:border-primary";
@@ -24,9 +25,9 @@ export default function AddLeadModal({ userId, onClose, onDone }: Props) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const mobile = f.mobile.replace(/[\s-]+/g, "");
+    const mobile = cleanMobile(f.mobile);
     if (!f.full_name.trim()) return setErr("Name is required.");
-    if (!/^(\+?91)?[6-9]\d{9}$/.test(mobile)) return setErr("Enter a valid 10-digit mobile number.");
+    if (!isValidMobile(mobile)) return setErr("Enter a valid 10-digit mobile number.");
     setSaving(true);
     setErr("");
     const { error } = await supabase.from("leads").insert({
